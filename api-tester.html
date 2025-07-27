@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .token-display {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 User Management API Tester</h1>
+    
+    <div class="container">
+        <h2>📝 User Registration</h2>
+        <div class="form-group">
+            <label for="signupName">Full Name:</label>
+            <input type="text" id="signupName" placeholder="John Doe">
+        </div>
+        <div class="form-group">
+            <label for="signupUsername">Username:</label>
+            <input type="text" id="signupUsername" placeholder="johndoe">
+        </div>
+        <div class="form-group">
+            <label for="signupEmail">Email:</label>
+            <input type="email" id="signupEmail" placeholder="john@example.com">
+        </div>
+        <div class="form-group">
+            <label for="signupPassword">Password:</label>
+            <input type="password" id="signupPassword" placeholder="password123">
+        </div>
+        <button onclick="signup()">Register User</button>
+        <div id="signupResponse" class="response" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>🔐 User Login</h2>
+        <div class="form-group">
+            <label for="loginUsername">Username or Email:</label>
+            <input type="text" id="loginUsername" placeholder="johndoe or john@example.com">
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" placeholder="password123">
+        </div>
+        <button onclick="login()">Login</button>
+        <div id="loginResponse" class="response" style="display:none;"></div>
+        <div id="tokenDisplay" class="token-display" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>👤 Get Current User Profile</h2>
+        <button onclick="getCurrentUser()">Get My Profile</button>
+        <div id="userProfileResponse" class="response" style="display:none;"></div>
+    </div>
+
+    <div class="container">
+        <h2>👥 Get All Users (Admin Only)</h2>
+        <button onclick="getAllUsers()">Get All Users</button>
+        <div id="allUsersResponse" class="response" style="display:none;"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api/v1';
+        let authToken = '';
+
+        async function signup() {
+            const data = {
+                name: document.getElementById('signupName').value,
+                username: document.getElementById('signupUsername').value,
+                email: document.getElementById('signupEmail').value,
+                password: document.getElementById('signupPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const responseDiv = document.getElementById('signupResponse');
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✅ Success: ${result.message}`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `❌ Error: ${result.message}`;
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('signupResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        async function login() {
+            const data = {
+                usernameOrEmail: document.getElementById('loginUsername').value,
+                password: document.getElementById('loginPassword').value
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/signin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const responseDiv = document.getElementById('loginResponse');
+                const tokenDiv = document.getElementById('tokenDisplay');
+                
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    authToken = result.accessToken;
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✅ Login Successful!\nToken Type: ${result.tokenType}`;
+                    
+                    tokenDiv.style.display = 'block';
+                    tokenDiv.innerHTML = `<strong>🔑 JWT Token:</strong><br>${result.accessToken}`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `❌ Login Failed: ${result.message}`;
+                    tokenDiv.style.display = 'none';
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('loginResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        async function getCurrentUser() {
+            if (!authToken) {
+                alert('Please login first to get a token!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/users/me`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+                const responseDiv = document.getElementById('userProfileResponse');
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✅ User Profile:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `❌ Error: ${result.message}`;
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('userProfileResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+
+        async function getAllUsers() {
+            if (!authToken) {
+                alert('Please login first to get a token!');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/users`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const result = await response.json();
+                const responseDiv = document.getElementById('allUsersResponse');
+                responseDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    responseDiv.className = 'response success';
+                    responseDiv.textContent = `✅ All Users:\n${JSON.stringify(result, null, 2)}`;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.textContent = `❌ Error: ${result.message}`;
+                }
+            } catch (error) {
+                const responseDiv = document.getElementById('allUsersResponse');
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.textContent = `❌ Network Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

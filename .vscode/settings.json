@@ -1,0 +1,25 @@
+{
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.debug.settings.hotCodeReplace": "auto",
+    "spring-boot.ls.problem.application-properties.enabled": true,
+    "spring-boot.ls.problem.application-yaml.enabled": true,
+    "java.saveActions.organizeImports": true,
+    "java.import.maven.enabled": true,
+    "java.configuration.maven.globalSettings": "",
+    "java.configuration.maven.userSettings": "",
+    "java.maven.downloadSources": true,
+    "java.sources.organizeImports.starThreshold": 99,
+    "java.sources.organizeImports.staticStarThreshold": 99,
+    "java.project.sourcePaths": [
+        "src/main/java"
+    ],
+    "java.project.outputPath": "target/classes",
+    "files.exclude": {
+        "**/target": true,
+        "**/.settings": true,
+        "**/.factorypath": true
+    },
+    "java.format.settings.url": ".vscode/java-formatter.xml"
+}

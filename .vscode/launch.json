@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Run UserManagementApiApplication",
+            "request": "launch",
+            "mainClass": "com.kumar.wipro.api.UserManagementApiApplication",
+            "projectName": "user-management-api",
+            "args": "",
+            "vmArgs": "-Dspring.profiles.active=dev",
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "java",
+            "name": "Debug UserManagementApiApplication",
+            "request": "launch",
+            "mainClass": "com.kumar.wipro.api.UserManagementApiApplication",
+            "projectName": "user-management-api",
+            "args": "",
+            "vmArgs": "-Dspring.profiles.active=dev",
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "type": "java",
+            "name": "Run Spring Boot App (Production)",
+            "request": "launch",
+            "mainClass": "com.kumar.wipro.api.UserManagementApiApplication",
+            "projectName": "user-management-api",
+            "args": "",
+            "vmArgs": "-Dspring.profiles.active=prod",
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ]
+}
