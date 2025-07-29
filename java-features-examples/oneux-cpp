@@ -1,0 +1,1277 @@
+# OneUX-CPP-CMP Project - Interview Preparation Guide
+
+## Table of Contents
+1. [Project Overview](#project-overview)
+2. [System Architecture](#system-architecture)
+3. [Technology Stack](#technology-stack)
+4. [Microservices Architecture](#microservices-architecture)
+5. [Security Implementation](#security-implementation)
+6. [Database Design](#database-design)
+7. [Frontend Architecture](#frontend-architecture)
+8. [DevOps & CI/CD](#devops--cicd)
+9. [Resilience & Monitoring](#resilience--monitoring)
+10. [Interview Questions & Answers](#interview-questions--answers)
+
+---
+
+## Project Overview
+
+### Application Details
+- **Name:** OneUX-CPP-CMP (Cloud Compute Platform - Component Management Portal)
+- **Purpose:** Internal portal for managing cloud compute resources within Cisco
+- **Domain:** Enterprise Cloud Infrastructure Management
+- **Team Size:** 10
+- **Duration:** 1 year
+- **Role:** backend developer
+
+### Business Context
+- **End Users:** Cisco engineers, platform administrators, automation pipelines
+- **Business Value:** Streamlined cloud resource management, cost optimization, compliance
+- **Scale:** Enterprise-level internal application serving 10000+ users
+
+### Core Functionalities
+- **Resource Provisioning:** Automated cloud compute resource allocation
+- **Resource Tracking:** Real-time monitoring and inventory management
+- **Tagging & Categorization:** Organized resource classification
+- **Approval Workflows:** Multi-level approval processes for resource requests
+- **Audit Logging:** Comprehensive activity tracking and compliance reporting
+
+---
+
+## System Architecture
+
+### High-Level Architecture
+```
+[End Users] 
+    ↓ HTTPS + JWT
+[Zuul API Gateway + Okta OAuth2]
+    ↓ Route to Microservices
+[Compute Service] [User Service] [Audit Service]
+    ↓ Kafka Events    ↓ JPA/Mongo    ↓ Event Processing
+[Oracle Database] [MongoDB] [Kafka Cluster]
+```
+
+### Architecture Principles
+- **Microservices Architecture:** Domain-driven service decomposition
+- **Event-Driven Design:** Asynchronous processing with Kafka
+- **Security-First:** OAuth2 + JWT + Role-based access control
+- **Polyglot Persistence:** Oracle for transactions, MongoDB for documents
+- **Cloud-Native:** Containerized deployment on Kubernetes
+
+### System Components
+1. **API Gateway Layer:** Zuul for routing, security, rate limiting
+2. **Authentication Layer:** Okta for OAuth2/JWT token management
+3. **Microservices Layer:** Domain-specific business services
+4. **Data Layer:** Dual database strategy (Oracle + MongoDB)
+5. **Event Streaming:** Kafka for async communication
+6. **Frontend Layer:** Hybrid Angular + React architecture
+
+---
+
+## Technology Stack
+
+### Backend Technologies
+- **Language:** Java 17 (Latest LTS)
+- **Framework:** Spring Boot 3.x
+- **Security:** Spring Security + Okta OAuth2
+- **API Gateway:** Netflix Zuul
+- **Messaging:** Apache Kafka
+- **Databases:** Oracle Database, MongoDB
+- **ORM:** Spring Data JPA, MongoTemplate
+- **Documentation:** Swagger/OpenAPI 3
+- **Resilience:** Resilience4j (Circuit Breaker, Retry, Timeout)
+
+### Frontend Technologies
+- **Primary UI:** Angular 16
+- **Widget Framework:** ReactJS
+- **State Management:** NgRx (Angular), Redux (React)
+- **HTTP Client:** Angular HttpClient, Axios
+- **UI Components:** Angular Material, React Material-UI
+- **Build Tools:** Angular CLI, Webpack
+
+### DevOps & Infrastructure
+- **Version Control:** Git
+- **CI/CD:** Jenkins/Azure DevOps
+- **Containerization:** Docker
+- **Orchestration:** Kubernetes
+- **Deployment:** ArgoCD, Helm Charts
+- **Code Quality:** SonarQube
+- **Monitoring:** Prometheus, Grafana
+- **Logging:** ELK Stack (Elasticsearch, Logstash, Kibana)
+
+---
+
+## Microservices Architecture
+
+### Service Decomposition Strategy
+**Domain-Driven Design (DDD) Approach:**
+- Services aligned with business capabilities
+- Bounded contexts clearly defined
+- Independent deployability and scalability
+
+### Core Microservices
+
+#### 1. Compute Service
+- **Responsibility:** Cloud resource lifecycle management
+- **APIs:** 
+  - `POST /api/compute/provision` - Provision new resources
+  - `GET /api/compute/resources` - List resources
+  - `PUT /api/compute/resources/{id}` - Update resource
+  - `DELETE /api/compute/resources/{id}` - Decommission resource
+- **Database:** Oracle (resource metadata, relationships)
+- **Events Published:** ResourceProvisioned, ResourceUpdated, ResourceDecommissioned
+
+#### 2. User Service
+- **Responsibility:** User management, roles, permissions
+- **APIs:**
+  - `GET /api/users/profile` - User profile
+  - `GET /api/users/permissions` - User permissions
+  - `POST /api/users/roles` - Assign roles
+- **Database:** Oracle (user data, role mappings)
+- **Integration:** Okta for authentication
+
+#### 3. Audit Service
+- **Responsibility:** Activity logging, compliance, reporting
+- **APIs:**
+  - `GET /api/audit/logs` - Retrieve audit logs
+  - `GET /api/audit/reports` - Generate compliance reports
+- **Database:** MongoDB (audit logs, activity snapshots)
+- **Events Consumed:** All domain events for audit trail
+
+### Inter-Service Communication
+- **Synchronous:** REST APIs for real-time queries
+- **Asynchronous:** Kafka events for decoupled workflows
+- **Service Discovery:** Spring Cloud Netflix Eureka
+- **Load Balancing:** Spring Cloud LoadBalancer
+
+---
+
+## Security Implementation
+
+### Authentication & Authorization Flow
+1. **User Login:** Angular/React redirects to Okta OAuth2
+2. **Token Issuance:** Okta issues JWT token
+3. **API Calls:** JWT passed in Authorization header
+4. **Gateway Validation:** Zuul validates JWT with Okta
+5. **Service Authorization:** Spring Security checks roles/permissions
+
+### Security Components
+- **Identity Provider:** Okta (OAuth2/OpenID Connect)
+- **Token Format:** JWT (JSON Web Tokens)
+- **Gateway Security:** Zuul + Spring Security
+- **Method-Level Security:** @PreAuthorize annotations
+- **CORS:** Configured for cross-origin requests
+
+### Security Best Practices
+- **Principle of Least Privilege:** Role-based access control
+- **Token Expiration:** Short-lived access tokens
+- **HTTPS Enforcement:** All communication encrypted
+- **Input Validation:** Request validation at API layer
+- **Audit Logging:** Security events tracked
+
+---
+
+## Database Design
+
+### Polyglot Persistence Strategy
+
+#### Oracle Database
+- **Purpose:** Transactional data, strong consistency
+- **Data Types:**
+  - Resource metadata (compute instances, configurations)
+  - User profiles and role mappings
+  - Approval workflows and states
+- **Features Used:**
+  - ACID transactions
+  - Foreign key relationships
+  - Complex queries with JOINs
+  - Stored procedures for business logic
+
+#### MongoDB
+- **Purpose:** Document storage, flexible schema
+- **Data Types:**
+  - Audit logs (activity traces)
+  - Resource snapshots (point-in-time states)
+  - Configuration templates
+- **Features Used:**
+  - Document flexibility
+  - Horizontal scaling
+  - Aggregation pipelines
+  - Time-series collections
+
+### Data Access Patterns
+- **Oracle Access:** Spring Data JPA with repositories
+- **MongoDB Access:** MongoTemplate for complex queries
+- **Caching:** Redis for session data and frequently accessed data
+- **Connection Pooling:** HikariCP for Oracle connections
+
+---
+
+## Frontend Architecture
+
+### Hybrid Frontend Strategy
+
+#### Angular 16 (Primary Dashboard)
+- **Purpose:** Main application shell and core functionality
+- **Features:**
+  - Resource management dashboards
+  - User administration
+  - Approval workflows
+- **Architecture:** 
+  - Modular design with feature modules
+  - Lazy loading for performance
+  - NgRx for state management
+  - Angular Material for UI components
+
+#### ReactJS (Plugin Widgets)
+- **Purpose:** Specialized widgets and dynamic components
+- **Features:**
+  - Real-time monitoring charts
+  - Custom resource visualizations
+  - Third-party integrations
+- **Architecture:**
+  - Component-based architecture
+  - Redux for state management
+  - React Material-UI for styling
+
+### Frontend-Backend Integration
+1. **Authentication:** OAuth2 redirect flow
+2. **API Communication:** RESTful APIs with JWT
+3. **Error Handling:** Centralized error interceptors
+4. **Loading States:** Progressive loading with skeleton screens
+5. **Real-time Updates:** WebSocket connections for live data
+
+---
+
+## DevOps & CI/CD
+
+### CI/CD Pipeline Architecture
+```
+[Git Repository] → [Jenkins/Azure DevOps] → [Docker Build] → [Kubernetes Deploy]
+      ↓                      ↓                    ↓                  ↓
+[Code Quality]     [Automated Tests]    [Image Registry]    [ArgoCD/Helm]
+[SonarQube]        [Unit/Integration]   [Docker Hub]       [K8s Cluster]
+```
+
+### Continuous Integration (CI)
+- **Trigger:** Git push to feature/develop branches
+- **Steps:**
+  1. Code checkout from Git
+  2. Static code analysis (SonarQube)
+  3. Unit test execution (JUnit, Jest)
+  4. Integration test execution
+  5. Security scanning (OWASP dependency check)
+  6. Docker image build and push
+
+### Continuous Deployment (CD)
+- **Trigger:** Merge to main/release branches
+- **Steps:**
+  1. Deploy to staging environment
+  2. Automated regression testing
+  3. Performance testing
+  4. Manual approval gate
+  5. Production deployment via ArgoCD
+  6. Post-deployment verification
+
+### Infrastructure as Code
+- **Kubernetes Manifests:** YAML configurations for deployments
+- **Helm Charts:** Templated configurations for environments
+- **ArgoCD:** GitOps-based continuous deployment
+- **Monitoring:** Prometheus metrics and Grafana dashboards
+
+---
+
+## Resilience & Monitoring
+
+### Resilience Patterns (Resilience4j)
+
+#### Circuit Breaker
+```java
+@CircuitBreaker(name = "compute-service", fallbackMethod = "fallbackComputeService")
+public ResponseEntity<Resource> getResource(String resourceId) {
+    // API call to external service
+}
+```
+
+#### Retry Mechanism
+```java
+@Retry(name = "database-retry")
+public Resource saveResource(Resource resource) {
+    // Database operation with retry
+}
+```
+
+#### Timeout Handling
+```java
+@TimeLimiter(name = "api-timeout")
+public CompletableFuture<String> getExternalData() {
+    // External API call with timeout
+}
+```
+
+### Monitoring & Observability
+- **Application Metrics:** Micrometer + Prometheus
+- **Logging:** Structured logging with Logback
+- **Tracing:** Spring Cloud Sleuth + Zipkin
+- **Health Checks:** Spring Boot Actuator endpoints
+- **Dashboards:** Grafana for metrics visualization
+- **Alerting:** Prometheus AlertManager
+
+### Error Handling Strategy
+- **Global Exception Handler:** @ControllerAdvice for API errors
+- **Centralized Logging:** All errors logged with correlation IDs
+- **User-Friendly Messages:** Error translation for frontend
+- **Fallback Mechanisms:** Graceful degradation for service failures
+
+---
+
+## Interview Questions & Answers
+
+### Architecture & Design Questions
+
+**Q1: Why did you choose microservices architecture for this project?**
+**A:** We chose microservices for several reasons:
+- **Scalability:** Different services have varying load patterns (Compute service vs Audit service)
+- **Team Independence:** Multiple teams could work on different services simultaneously
+- **Technology Flexibility:** Use optimal technology for each domain (Oracle for transactions, MongoDB for logs)
+- **Fault Isolation:** Failure in one service doesn't bring down the entire system
+- **Deployment Independence:** Services can be deployed and updated independently
+
+**Q2: How do you handle distributed transactions across microservices?**
+**A:** We use the Saga pattern with event-driven choreography:
+- **Event Sourcing:** Each service publishes events for state changes
+- **Eventual Consistency:** Accept temporary inconsistency for better availability
+- **Compensation Actions:** Implement rollback logic for failed transactions
+- **Idempotency:** Ensure operations can be safely retried
+- **Example:** Resource provisioning saga with Compute → User → Audit service coordination
+
+**Q3: Explain your database design strategy.**
+**A:** We implemented polyglot persistence:
+- **Oracle for ACID transactions:** Resource metadata, user data requiring strong consistency
+- **MongoDB for flexible documents:** Audit logs, configuration templates, time-series data
+- **Data Synchronization:** Kafka events ensure data consistency across databases
+- **Performance Optimization:** Separate read/write concerns, appropriate indexing strategies
+
+### Technology-Specific Questions
+
+**Q4: How do you secure microservices communication?**
+**A:** Multi-layered security approach:
+- **OAuth2 + JWT:** Okta provides centralized authentication
+- **API Gateway:** Zuul validates tokens and enforces security policies
+- **Service-to-Service:** mTLS for internal communication
+- **Role-Based Access:** Spring Security with method-level authorization
+- **Token Validation:** Each service validates JWT signatures locally
+
+**Q5: How do you handle service failures and ensure system resilience?**
+**A:** Using Resilience4j patterns:
+- **Circuit Breaker:** Prevent cascade failures (e.g., if Oracle is down)
+- **Retry with Backoff:** Automatic retry for transient failures
+- **Timeout:** Prevent hanging requests
+- **Bulkhead:** Isolate critical resources
+- **Fallback Methods:** Graceful degradation (cached data, default responses)
+
+**Q6: Explain your CI/CD pipeline and deployment strategy.**
+**A:** GitOps-based approach:
+- **Source Control:** Git with feature branch workflow
+- **CI:** Jenkins builds, tests, creates Docker images
+- **CD:** ArgoCD monitors Git for changes, deploys to Kubernetes
+- **Testing:** Automated unit, integration, and E2E tests
+- **Blue-Green Deployment:** Zero-downtime deployments
+- **Rollback:** Quick rollback capability through Git reverts
+
+### Performance & Scalability Questions
+
+**Q7: How do you monitor and troubleshoot the system?**
+**A:** Comprehensive observability:
+- **Metrics:** Prometheus collects application and infrastructure metrics
+- **Logging:** ELK stack with structured logging and correlation IDs
+- **Tracing:** Zipkin for distributed request tracing
+- **Dashboards:** Grafana for real-time monitoring
+- **Alerting:** Prometheus AlertManager for proactive issue detection
+
+**Q8: How do you handle high traffic and ensure scalability?**
+**A:** Multiple strategies:
+- **Horizontal Scaling:** Kubernetes auto-scaling based on CPU/memory
+- **Caching:** Redis for session data and frequently accessed resources
+- **Database Optimization:** Connection pooling, query optimization, read replicas
+- **Async Processing:** Kafka for non-blocking operations
+- **CDN:** Static assets served through CDN
+
+### Business & Team Questions
+
+**Q9: What challenges did you face and how did you overcome them?**
+**A:** Key challenges:
+- **Service Discovery:** Initially used static configuration, migrated to Eureka
+- **Data Consistency:** Implemented eventual consistency with compensation actions
+- **Performance:** Added caching layer and optimized database queries
+- **Security:** Implemented proper token validation and CORS configuration
+- **Team Coordination:** Established API contracts and communication protocols
+
+**Q10: Can you describe specific technical challenges you solved during development?**
+**A:** I'll detail two critical P1 issues I personally resolved:
+
+**Challenge 1: P1 Memory Leak - OneUX-P2-VM-API OutOfMemoryError**
+- **Problem:** OneUX-P2-VM-API production servers crashing with OutOfMemoryError every 2-3 hours
+- **Application Impact:** Virtual machine provisioning service completely down, affecting 100+ engineers
+- **Root Cause Analysis:**
+  - Monitored heap dumps using VisualVM and JProfiler
+  - Found database connections not being closed properly in ResourceService
+  - HikariCP connection pool growing from 10 to 500+ connections without cleanup
+- **Solution Implemented:**
+  ```java
+  // Before: Connection leak causing OutOfMemoryError
+  @Service
+  public class ResourceService {
+      
+      @Autowired
+      private DataSource dataSource;
+      
+      public List<Resource> getResources() {
+          try {
+              Connection conn = dataSource.getConnection();
+              PreparedStatement stmt = conn.prepareStatement(
+                  "SELECT id, name, type, status, created_date FROM vm_resources WHERE status = 'ACTIVE'"
+              );
+              ResultSet rs = stmt.executeQuery();
+              
+              List<Resource> results = new ArrayList<>();
+              while (rs.next()) {
+                  Resource resource = new Resource();
+                  resource.setId(rs.getLong("id"));
+                  resource.setName(rs.getString("name"));
+                  resource.setType(rs.getString("type"));
+                  resource.setStatus(rs.getString("status"));
+                  resource.setCreatedDate(rs.getTimestamp("created_date"));
+                  results.add(resource);
+              }
+              // Missing: conn.close(), stmt.close(), rs.close() - MEMORY LEAK!
+              return results;
+              
+          } catch (SQLException e) {
+              throw new RuntimeException("Failed to fetch resources", e);
+          }
+      }
+  }
+  
+  // After: Proper resource management with try-with-resources
+  @Service
+  public class ResourceService {
+      
+      @Autowired
+      private DataSource dataSource;
+      
+      public List<Resource> getResources() {
+          String sql = "SELECT id, name, type, status, created_date FROM vm_resources WHERE status = 'ACTIVE'";
+          
+          try (Connection conn = dataSource.getConnection();
+               PreparedStatement stmt = conn.prepareStatement(sql);
+               ResultSet rs = stmt.executeQuery()) {
+               
+              List<Resource> results = new ArrayList<>();
+              while (rs.next()) {
+                  Resource resource = new Resource();
+                  resource.setId(rs.getLong("id"));
+                  resource.setName(rs.getString("name"));
+                  resource.setType(rs.getString("type"));
+                  resource.setStatus(rs.getString("status"));
+                  resource.setCreatedDate(rs.getTimestamp("created_date"));
+                  results.add(resource);
+              }
+              return results;
+              // try-with-resources automatically closes Connection, PreparedStatement, ResultSet
+              
+          } catch (SQLException e) {
+              throw new RuntimeException("Failed to fetch resources", e);
+          }
+      }
+  }
+  ```
+**Technical Implementation & Deployment:**
+1. **Code Fix Applied:**
+   - Fixed all database connections to use try-with-resources pattern
+   - Ensured automatic cleanup of Connection, PreparedStatement, ResultSet objects
+   - Added defensive programming for all JDBC operations
+
+2. **Added Connection Pool Monitoring:**
+   ```java
+   @Component
+   public class ConnectionPoolMonitor {
+       
+       @Autowired
+       private HikariDataSource dataSource;
+       
+       @Scheduled(fixedRate = 30000) // Every 30 seconds
+       public void logConnectionPoolStats() {
+           HikariPoolMXBean poolBean = dataSource.getHikariPoolMXBean();
+           log.info("Connection Pool Stats - Active: {}, Idle: {}, Total: {}, Waiting: {}", 
+                   poolBean.getActiveConnections(),
+                   poolBean.getIdleConnections(),
+                   poolBean.getTotalConnections(),
+                   poolBean.getThreadsAwaitingConnection());
+           
+           // Alert if connection usage > 80%
+           if (poolBean.getActiveConnections() > 8) {
+               log.warn("High connection usage detected: {}/10 connections active", 
+                       poolBean.getActiveConnections());
+           }
+       }
+   }
+   ```
+
+3. **Deployment Strategy:**
+   - **Step 1:** Committed fix to feature branch: `feature/fix-memory-leak-JIRA-12345`
+   - **Step 2:** Code review and approval from senior developer
+   - **Step 3:** Merged to hotfix branch: `hotfix/oneux-p2-vm-api-memory-fix`
+   - **Step 4:** Deployed to staging for validation
+   - **Step 5:** Emergency deployment to production (main branch)
+   - **Step 6:** Post-deployment monitoring for 24 hours
+
+4. **Verification & Testing:**
+   - Load tested with 50+ concurrent users creating VMs
+   - Monitored heap usage for 6+ hours - stable memory consumption
+   - Verified connection pool metrics - stable at 8-12 connections
+   - Confirmed no OutOfMemoryError exceptions in logs
+- **Results:** Eliminated memory leaks, 99.9% uptime restored, no crashes in 6+ months
+
+**Challenge 2: P1 Null Pointer Exception - User Authentication Failure**
+- **Problem:** Random NullPointerException during user login causing authentication failures
+- **Impact:** 30% of login attempts failing, users unable to access the application
+- **Root Cause Analysis:**
+  - Analyzed application logs and found NPE in JWT token parsing
+  - Issue occurred when Okta JWT token had missing 'roles' claim
+  - Code assumed 'roles' field always existed in JWT payload
+- **Solution Implemented:**
+  ```java
+  // Before: No null check - caused NPE
+  @Service
+  public class JwtService {
+      public Set<String> extractRoles(String token) {
+          Claims claims = parseToken(token);
+          List<String> roles = claims.get("roles", List.class);
+          return new HashSet<>(roles); // NPE when roles is null!
+      }
+  }
+  
+  // After: Defensive programming with null checks
+  @Service
+  public class JwtService {
+      public Set<String> extractRoles(String token) {
+          Claims claims = parseToken(token);
+          List<String> roles = claims.get("roles", List.class);
+          return roles != null ? new HashSet<>(roles) : Collections.emptySet();
+      }
+  }
+  ```
+- **Technical Implementation:**
+  - Added null checks for all JWT claim extractions
+  - Implemented default role assignment when roles claim missing
+  - Added unit tests to cover null/missing claim scenarios
+- **Results:** Zero authentication failures, 100% login success rate, improved user experience
+
+**Q11: How did this project impact the business?**
+**A:** Significant business value:
+- **Efficiency:** Reduced resource provisioning time from hours to minutes
+- **Cost Optimization:** Better resource tracking led to 20% cost reduction
+- **Compliance:** Automated audit trails improved compliance reporting
+- **User Experience:** Intuitive UI reduced training time for new users
+- **Scalability:** System can handle 10x current load without major changes
+
+---
+
+## Critical Production Issues Resolved
+
+## Critical Production Issues Resolved
+
+### Issue 1: P1 Memory Leak - OneUX-P2-VM-API OutOfMemoryError Crashes
+**Priority:** P1 (Critical Production Issue)
+**Application:** OneUX-P2-VM-API (Virtual Machine Provisioning Service)
+**Timeline:** 1-day resolution under pressure
+
+**Problem Statement:**
+- OneUX-P2-VM-API production servers crashing every 2-3 hours with OutOfMemoryError
+- Complete application downtime during crashes
+- Affecting 100+ engineers unable to provision VMs for development/testing
+
+**Business Impact:**
+- **Service Downtime:** 4-6 hours daily of complete VM provisioning service unavailability
+- **User Productivity:** Engineering teams blocked from creating development environments
+- **Business Operations:** VM provisioning requests queued up, delaying project deliveries
+- **Escalation:** Issue escalated to management due to repeated production outages
+
+**Investigation Process:**
+1. **Story Assignment & Status Update:**
+   - P1 story assigned to me: "OneUX-P2-VM-API OutOfMemoryError crashes"
+   - Immediately changed JIRA status to "Work In Progress"
+   - Reproduced the issue in staging environment
+
+2. **Memory Profiling with VisualVM:**
+   **Step-by-Step VisualVM Setup:**
+   ```bash
+   # Step 1: Start application with JMX enabled
+   java -Dcom.sun.management.jmxremote=true \
+        -Dcom.sun.management.jmxremote.port=9999 \
+        -Dcom.sun.management.jmxremote.authenticate=false \
+        -Dcom.sun.management.jmxremote.ssl=false \
+        -jar oneux-p2-vm-api.jar
+   
+   # Step 2: Launch VisualVM
+   # Download from: https://visualvm.github.io/
+   # Or use JDK bundled version: $JAVA_HOME/bin/jvisualvm
+   jvisualvm
+   
+   # Step 3: Connect to remote application
+   # File → Add JMX Connection → localhost:9999
+   # Click "Connect"
+   
+   # Step 4: Monitor memory usage
+   # Go to "Monitor" tab → Watch heap usage over time
+   # Go to "Sampler" tab → Start memory sampling
+   # Generate heap dump when memory is high
+   ```
+
+3. **Memory Profiling with JProfiler:**
+   **Step-by-Step JProfiler Setup:**
+   ```bash
+   # Step 1: Download and install JProfiler
+   # Website: https://www.ej-technologies.com/products/jprofiler/overview.html
+   
+   # Step 2: Start application with JProfiler agent
+   java -agentpath:/path/to/jprofiler/bin/linux-x64/libjprofilerti.so=port=8849 \
+        -jar oneux-p2-vm-api.jar
+   
+   # Step 3: Launch JProfiler GUI
+   # Create new session → Attach to running JVM
+   # Select application running on port 8849
+   
+   # Step 4: Analyze memory leaks
+   # Go to "Live Memory" → "All Objects"
+   # Look for objects with high retention count
+   # Use "Heap Walker" to analyze memory dumps
+   # Check "Reference" view to find leak sources
+   ```
+
+4. **Key Findings from Profiling:**
+   - **VisualVM Results:** Heap usage climbing from 512MB to 2GB over 2 hours
+   - **JProfiler Results:** 500+ Connection objects retained in memory
+   - **Root Cause:** Database connections not being closed in ResourceService
+   - **Impact Analysis:** Each connection consuming ~2MB, leading to heap exhaustion
+
+**Technical Root Cause:**
+- Database connections not being closed properly in ResourceService.getResources() method
+- HikariCP connection pool growing from 10 to 500+ connections over time
+- Each connection consuming ~2MB memory, leading to heap exhaustion after 2-3 hours
+
+**Solution Implementation:**
+```java
+// Problem: Missing connection cleanup causing memory leak
+@Service
+public class ResourceService {
+    
+    @Autowired
+    private DataSource dataSource;
+    
+    public List<Resource> getResources() {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = dataSource.getConnection();
+            stmt = conn.prepareStatement(
+                "SELECT id, name, type, status, created_date FROM vm_resources WHERE status = 'ACTIVE'"
+            );
+            rs = stmt.executeQuery();
+            
+            List<Resource> results = new ArrayList<>();
+            while (rs.next()) {
+                Resource resource = new Resource();
+                resource.setId(rs.getLong("id"));
+                resource.setName(rs.getString("name"));
+                resource.setType(rs.getString("type"));
+                resource.setStatus(rs.getString("status"));
+                resource.setCreatedDate(rs.getTimestamp("created_date"));
+                results.add(resource);
+            }
+            return results;
+            
+            // CRITICAL BUG: Missing cleanup code below!
+            // Should have been:
+            // rs.close();
+            // stmt.close();
+            // conn.close();
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch VM resources", e);
+        }
+        // Resources never closed = MEMORY LEAK!
+    }
+}
+
+// Solution Option 1: Manual resource cleanup (traditional approach)
+@Service
+public class ResourceService {
+    
+    @Autowired
+    private DataSource dataSource;
+    
+    public List<Resource> getResources() {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = dataSource.getConnection();
+            stmt = conn.prepareStatement(
+                "SELECT id, name, type, status, created_date FROM vm_resources WHERE status = 'ACTIVE'"
+            );
+            rs = stmt.executeQuery();
+            
+            List<Resource> results = new ArrayList<>();
+            while (rs.next()) {
+                Resource resource = new Resource();
+                resource.setId(rs.getLong("id"));
+                resource.setName(rs.getString("name"));
+                resource.setType(rs.getString("type"));
+                resource.setStatus(rs.getString("status"));
+                resource.setCreatedDate(rs.getTimestamp("created_date"));
+                results.add(resource);
+            }
+            return results;
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch VM resources", e);
+        } finally {
+            // Manual cleanup - verbose and error-prone
+            if (rs != null) {
+                try { rs.close(); } catch (SQLException e) { /* log error */ }
+            }
+            if (stmt != null) {
+                try { stmt.close(); } catch (SQLException e) { /* log error */ }
+            }
+            if (conn != null) {
+                try { conn.close(); } catch (SQLException e) { /* log error */ }
+            }
+        }
+    }
+}
+
+// Solution Option 2: try-with-resources (Java 7+ best practice)
+@Service
+public class ResourceService {
+    
+    @Autowired
+    private DataSource dataSource;
+    
+    public List<Resource> getResources() {
+        String sql = "SELECT id, name, type, status, created_date FROM vm_resources WHERE status = 'ACTIVE'";
+        
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+             
+            List<Resource> results = new ArrayList<>();
+            while (rs.next()) {
+                Resource resource = new Resource();
+                resource.setId(rs.getLong("id"));
+                resource.setName(rs.getString("name"));
+                resource.setType(rs.getString("type"));
+                resource.setStatus(rs.getString("status"));
+                resource.setCreatedDate(rs.getTimestamp("created_date"));
+                results.add(resource);
+            }
+            return results;
+            
+            // NOTE: No manual close() calls needed!
+            // try-with-resources automatically calls:
+            // - rs.close()
+            // - stmt.close() 
+            // - conn.close()
+            // This happens even if exception occurs!
+            
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to fetch VM resources", e);
+        }
+        // Resources are guaranteed to be closed here
+    }
+}
+```
+
+**Additional Monitoring Added:**
+```java
+// Added connection pool monitoring
+@Component
+public class ConnectionPoolMonitor {
+    
+    @Autowired
+    private HikariDataSource dataSource;
+    
+    @Scheduled(fixedRate = 30000) // Every 30 seconds
+    public void logConnectionPoolStats() {
+        HikariPoolMXBean poolBean = dataSource.getHikariPoolMXBean();
+        log.info("Connection Pool Stats - Active: {}, Idle: {}, Total: {}, Waiting: {}", 
+                poolBean.getActiveConnections(),
+                poolBean.getIdleConnections(),
+                poolBean.getTotalConnections(),
+                poolBean.getThreadsAwaitingConnection());
+    }
+}
+```
+
+**Results & Impact:**
+- **Memory Stability:** Zero OutOfMemoryError crashes in 6+ months
+- **Service Uptime:** Improved from 85% to 99.9% availability
+- **Connection Pool:** Stable at 8-12 connections during peak usage
+- **Business Recovery:** Uninterrupted VM provisioning service for all engineering teams
+- **User Impact:** 100+ internal engineers can now reliably create VMs and CRs (Change Requests)
+- **Performance:** VM creation time reduced from timeout failures to consistent 30-60 seconds
+- **Monitoring:** Proactive alerts prevent future connection pool exhaustion issues
+
+---
+
+## Interview Narrative - Memory Leak Resolution
+
+**"Let me walk you through how I resolved this critical P1 production issue..."**
+
+### The Story Flow for Interviews:
+
+**1. Problem Assignment:**
+- "One of our applications called **OneUX-P2-VM-API** was experiencing OutOfMemoryError crashes every 2-3 hours"
+- "A P1 story was assigned to me since I was the backend developer responsible for this service"
+- "First thing I did was change the JIRA story status to 'Work In Progress' and started reproducing the issue"
+
+**2. Investigation Approach:**
+- "I quickly reproduced the issue in our staging environment by simulating high load"
+- "Then I ran **JProfiler** and **VisualVM** to analyze memory usage patterns"
+- "Within a few hours, I could see the heap usage climbing from 512MB to 2GB over time"
+
+**3. Root Cause Discovery:**
+- "Using the profiling tools, I observed that database connection objects were not being closed properly"
+- "The HikariCP connection pool was growing from 10 to 500+ connections without cleanup"
+- "This was causing memory leak issues affecting around 100+ internal users who were unable to create VMs or CRs"
+
+**4. Solution Implementation:**
+- "I fixed all connection closing issues using **try-with-resources** pattern instead of manual cleanup"
+- "Additionally, I added monitoring by creating a connection pool monitoring component"
+- "Used Spring Boot's **@Scheduled(fixedRate = 30000)** to log connection stats every 30 seconds"
+
+**5. Deployment & Results:**
+- "I deployed the changes from my feature branch to hotfix branch, then to production (main branch)"
+- "After deployment, I observed:"
+  - "Service uptime improved from 85% to 99.9%"
+  - "Connection pool remained stable at 8-12 connections during peak usage"
+  - "Business recovery: Uninterrupted VM provisioning service for all engineering teams"
+
+**Key Interview Points:**
+- ✅ **Quick Response:** Immediately took ownership and started investigation
+- ✅ **Technical Skills:** Used professional profiling tools (JProfiler, VisualVM)
+- ✅ **Root Cause Analysis:** Systematically identified the exact problem
+- ✅ **Best Practices:** Applied modern Java patterns (try-with-resources)
+- ✅ **Proactive Monitoring:** Added observability to prevent future issues
+- ✅ **Business Impact:** Quantified the improvement with specific metrics
+
+### Issue 2: P1 Authentication Failure - OneUX-User-Service NullPointerException
+**Priority:** P1 (Critical Production Issue)
+**Application:** OneUX-User-Service (Authentication & Authorization Service)
+**Timeline:** 4-hour resolution
+
+**Problem Statement:**
+- OneUX-User-Service experiencing random NullPointerException during user login process
+- 30% of login attempts failing with HTTP 500 internal server error
+- Users unable to access OneUX-CPP-CMP portal, blocking daily infrastructure work
+
+**Business Impact:**
+- **User Access:** 30% login failure rate affecting 300+ engineers productivity
+- **Support Load:** 50+ helpdesk tickets per day for login issues
+- **Business Continuity:** Teams unable to access critical infrastructure management tools
+- **User Experience:** Frustration with unreliable authentication system, forcing users to retry multiple times
+
+**Investigation Process:**
+1. **Story Assignment & Status Update:**
+   - P1 story assigned to me: "OneUX-User-Service authentication failures - NPE"
+   - Updated JIRA status to "Work In Progress"
+   - Reproduced the issue by testing different user accounts
+
+2. **Log Analysis & Debugging with AppDynamics:**
+   **Step-by-Step AppDynamics Investigation:**
+   ```bash
+   # Step 1: Login to AppDynamics Controller
+   # URL: https://cisco-prod.saas.appdynamics.com/
+   # Navigate to Applications → OneUX-User-Service
+   
+   # Step 2: Check Application Health Dashboard
+   # Go to "Application Dashboard" → Monitor application health
+   # Look for error rate spikes and response time increases
+   # Check "Errors" tab for exception patterns
+   
+   # Step 3: Analyze Error Analytics
+   # Navigate to "Error Analytics" → "Exceptions"
+   # Filter by: Exception Type = "NullPointerException"
+   # Time Range: Last 24 hours
+   # Group by: Error Message and Stack Trace
+   
+   # Step 4: Business Transaction Analysis
+   # Go to "Business Transactions" → "/api/auth/login"
+   # Check transaction snapshots with errors
+   # Analyze call stack and method execution times
+   # Look for slow database calls or external service calls
+   ```
+
+   **AppDynamics Analysis Results:**
+   ```
+   Exception Analytics Dashboard:
+   ┌─────────────────────────────────────────────────────────────┐
+   │ Exception: java.lang.NullPointerException                   │
+   │ Count: 1,247 occurrences (Last 24h)                        │
+   │ Error Rate: 30.2% of login transactions                     │
+   │ Peak Time: 9:00 AM - 11:00 AM (peak login hours)           │
+   │                                                             │
+   │ Top Stack Trace:                                            │
+   │ com.kumar.wipro.api.security.JwtService.extractRoles():45   │
+   │   -> new HashSet<>(roles) // roles is null                 │
+   │                                                             │
+   │ Affected Business Transactions:                             │
+   │ • /api/auth/login (30% failure rate)                       │
+   │ • /api/auth/refresh-token (15% failure rate)               │
+   │ • /api/users/profile (10% failure rate)                    │
+   └─────────────────────────────────────────────────────────────┘
+   ```
+
+3. **Transaction Snapshot Analysis:**
+   **AppDynamics Transaction Flow:**
+   ```
+   Login Transaction Flow (Failed):
+   ┌─────────────────────────────────────────────────────────────┐
+   │ 1. HTTP Request: POST /api/auth/login                       │
+   │    Duration: 245ms                                          │
+   │    Status: 500 Internal Server Error                       │
+   │                                                             │
+   │ 2. AuthController.login() - 15ms                            │
+   │    ├─ Input validation - 2ms ✓                             │
+   │    └─ JWT processing - 13ms ❌                             │
+   │                                                             │
+   │ 3. JwtService.extractRoles() - 8ms ❌                      │
+   │    ├─ JWT decode - 3ms ✓                                   │
+   │    ├─ Claims extraction - 2ms ✓                            │
+   │    └─ new HashSet<>(roles) - NPE thrown! ❌               │
+   │                                                             │
+   │ 4. Exception Handler - 5ms                                 │
+   │    └─ Return HTTP 500 error                                │
+   └─────────────────────────────────────────────────────────────┘
+   ```
+
+4. **JWT Token Analysis in AppDynamics:**
+   **Custom Dashboard Setup:**
+   ```bash
+   # Step 1: Create Custom Dashboard for JWT Analysis
+   # Navigate to "Dashboards" → "Create Dashboard"
+   # Add widgets for JWT token analysis
+   
+   # Step 2: Add Custom Metrics
+   # Go to "Metric Browser" → "Application Infrastructure Performance"
+   # Create custom metrics for JWT claims:
+   # - jwt.claims.roles.present (boolean metric)
+   # - jwt.claims.roles.count (count metric)
+   # - jwt.users.missing.roles (count metric)
+   
+   # Step 3: Set up Alerts
+   # Navigate to "Alert & Respond" → "Health Rules"
+   # Create health rule: "JWT Authentication Failure Rate"
+   # Condition: Error rate > 20% for /api/auth/login
+   # Action: Send email to dev team + create incident
+   ```
+
+   **AppDynamics Custom Metrics Dashboard:**
+   ```
+   JWT Authentication Metrics (Last 24h):
+   ┌─────────────────────────────────────────────────────────────┐
+   │ Total Login Attempts: 4,156                                 │
+   │ Successful Logins: 2,909 (70%)                             │
+   │ Failed Logins: 1,247 (30%)                                 │
+   │                                                             │
+   │ JWT Claims Analysis:                                        │
+   │ • Tokens with roles claim: 2,909 (70%)                     │
+   │ • Tokens missing roles claim: 1,247 (30%)                  │
+   │ • Average roles per user: 2.3                              │
+   │                                                             │
+   │ User Distribution:                                          │
+   │ • Engineering team: 85% (roles present)                    │
+   │ • Contractor accounts: 15% (roles missing) ❌             │
+   │                                                             │
+   │ Peak Failure Times:                                         │
+   │ • 9:00-11:00 AM: 45% failure rate                         │
+   │ • 1:00-3:00 PM: 38% failure rate                          │
+   │ • 6:00-8:00 PM: 22% failure rate                          │
+   └─────────────────────────────────────────────────────────────┘
+   ```
+
+3. **JWT Token Analysis:**
+   **Working Token Payload:**
+   ```json
+   {
+     "sub": "user123@cisco.com",
+     "name": "John Doe",
+     "email": "john.doe@cisco.com",
+     "roles": ["ENGINEER", "VM_CREATOR"],
+     "groups": ["oneux-users"],
+     "iat": 1640995200,
+     "exp": 1641081600
+   }
+   ```
+   
+   **Failing Token Payload:**
+   ```json
+   {
+     "sub": "user456@cisco.com",
+     "name": "Jane Smith",
+     "email": "jane.smith@cisco.com",
+     "groups": ["oneux-users"],
+     "iat": 1640995200,
+     "exp": 1641081600
+     // NOTE: Missing "roles" claim!
+   }
+   ```
+
+4. **Code Review & Root Cause:**
+   - **Location:** `JwtService.extractRoles()` method in OneUX-User-Service
+   - **Issue:** Code assumed 'roles' claim always existed in JWT token
+   - **Impact:** Some user accounts in Okta had missing or null 'roles' claim
+   - **Exception:** NullPointerException thrown when calling `new HashSet<>(roles)` with null list
+
+**Technical Root Cause:**
+- **Exact Location:** `JwtService.extractRoles()` method in OneUX-User-Service
+- **File Path:** `src/main/java/com/kumar/wipro/api/security/JwtService.java:45`
+- **Problem:** Code assumed 'roles' claim always existed in JWT token payload
+- **Issue:** Some user accounts in Okta configuration had missing or null 'roles' claim
+- **Exception:** `java.lang.NullPointerException: Cannot invoke "java.util.List.iterator()" because "roles" is null`
+
+**Solution Implementation:**
+```java
+// Problem: No null check for JWT claims - causing NPE
+@Service
+public class JwtService {
+    
+    @Autowired
+    private JwtDecoder jwtDecoder;
+    
+    public Set<String> extractRoles(String jwtToken) {
+        try {
+            Jwt jwt = jwtDecoder.decode(jwtToken);
+            Claims claims = jwt.getClaims();
+            
+            // CRITICAL BUG: This line throws NPE when roles is null!
+            List<String> roles = claims.get("roles", List.class);
+            return new HashSet<>(roles); // NPE when roles is null!
+            
+        } catch (Exception e) {
+            throw new AuthenticationException("Invalid JWT token", e);
+        }
+    }
+    
+    public String extractEmail(String jwtToken) {
+        Jwt jwt = jwtDecoder.decode(jwtToken);
+        return jwt.getClaim("email"); // Also could be null!
+    }
+}
+
+// Solution: Defensive programming with comprehensive null checks
+@Service
+public class JwtService {
+    
+    @Autowired
+    private JwtDecoder jwtDecoder;
+    
+    public Set<String> extractRoles(String jwtToken) {
+        try {
+            Jwt jwt = jwtDecoder.decode(jwtToken);
+            Claims claims = jwt.getClaims();
+            
+            // Safe extraction with null check
+            List<String> roles = claims.get("roles", List.class);
+            
+            if (roles == null || roles.isEmpty()) {
+                log.warn("No roles found in JWT for user: {}, assigning default role", 
+                        claims.get("email"));
+                return Set.of("USER"); // Default role when roles missing
+            }
+            
+            return new HashSet<>(roles);
+            
+        } catch (Exception e) {
+            log.error("Failed to extract roles from JWT: {}", e.getMessage());
+            throw new AuthenticationException("Invalid JWT token", e);
+        }
+    }
+    
+    public String extractEmail(String jwtToken) {
+        try {
+            Jwt jwt = jwtDecoder.decode(jwtToken);
+            String email = jwt.getClaim("email");
+            
+            if (email == null || email.trim().isEmpty()) {
+                throw new AuthenticationException("Email claim missing in JWT token");
+            }
+            
+            return email;
+            
+        } catch (Exception e) {
+            log.error("Failed to extract email from JWT: {}", e.getMessage());
+            throw new AuthenticationException("Invalid JWT token", e);
+        }
+    }
+    
+    public String extractUsername(String jwtToken) {
+        try {
+            Jwt jwt = jwtDecoder.decode(jwtToken);
+            String username = jwt.getClaim("sub");
+            
+            return username != null ? username : jwt.getClaim("email");
+            
+        } catch (Exception e) {
+            log.error("Failed to extract username from JWT: {}", e.getMessage());
+            throw new AuthenticationException("Invalid JWT token", e);
+        }
+    }
+}
+```
+
+**Technical Implementation & Deployment:**
+1. **Code Fix Applied:**
+   - Added null checks for all JWT claim extractions (roles, email, name, groups)
+   - Implemented default role assignment when roles claim missing
+   - Added comprehensive error handling and logging
+
+2. **Unit Tests Added:**
+   ```java
+   @Test
+   public void testExtractRoles_WithNullRoles_ShouldReturnDefaultRole() {
+       // Arrange
+       String tokenWithoutRoles = createJwtTokenWithoutRoles();
+       
+       // Act
+       Set<String> roles = jwtService.extractRoles(tokenWithoutRoles);
+       
+       // Assert
+       assertThat(roles).containsExactly("USER");
+   }
+   
+   @Test
+   public void testExtractRoles_WithEmptyRoles_ShouldReturnDefaultRole() {
+       // Arrange
+       String tokenWithEmptyRoles = createJwtTokenWithEmptyRoles();
+       
+       // Act
+       Set<String> roles = jwtService.extractRoles(tokenWithEmptyRoles);
+       
+       // Assert
+       assertThat(roles).containsExactly("USER");
+   }
+   
+   @Test
+   public void testExtractEmail_WithNullEmail_ShouldThrowException() {
+       // Arrange
+       String tokenWithoutEmail = createJwtTokenWithoutEmail();
+       
+       // Act & Assert
+       assertThrows(AuthenticationException.class, 
+                   () -> jwtService.extractEmail(tokenWithoutEmail));
+   }
+   ```
+
+3. **Deployment Strategy:**
+   - **Step 1:** Committed fix to feature branch: `feature/fix-jwt-npe-JIRA-67890`
+   - **Step 2:** Code review with security team approval
+   - **Step 3:** Merged to hotfix branch: `hotfix/oneux-user-service-auth-fix`
+   - **Step 4:** Deployed to staging for authentication testing
+   - **Step 5:** Production deployment during low-traffic window
+   - **Step 6:** Real-time monitoring of login success rates
+
+4. **Verification & Testing:**
+   - Tested with 100+ different user accounts (with and without roles)
+   - Monitored authentication logs for 24 hours
+   - Verified 100% login success rate
+   - Confirmed default role assignment working correctly
+
+**Results & Impact:**
+- **Authentication Success:** 100% login success rate achieved
+- **Zero NPE:** No NullPointerException errors since fix
+- **User Experience:** Seamless login process for all user types
+- **Code Quality:** Improved defensive programming practices across team
+- **User Impact:** 300+ engineers can now reliably access the OneUX-CPP-CMP portal
+- **Support Reduction:** Helpdesk tickets reduced from 50+ to 0 per day for login issues
+- **Business Continuity:** Uninterrupted access to critical infrastructure management tools
+
+---
+
+## Interview Narrative - Authentication Failure Resolution
+
+**"Let me walk you through how I resolved this critical P1 authentication issue..."**
+
+### The Story Flow for Interviews:
+
+**1. Problem Assignment:**
+- "Our **OneUX-User-Service** was experiencing random NullPointerException during user login"
+- "30% of login attempts were failing with HTTP 500 errors, affecting 300+ engineers"
+- "A P1 story was assigned to me as I was responsible for the authentication microservice"
+
+**2. Investigation Approach:**
+- "I immediately changed JIRA status to 'Work In Progress' and started debugging"
+- "Logged into **AppDynamics** production controller to analyze the application health"
+- "Used **Error Analytics** to filter NullPointerException patterns and found 1,247 occurrences in 24 hours"
+- "The **Transaction Snapshots** showed the exact failure point in `JwtService.extractRoles()` method at line 45"
+
+**3. Root Cause Discovery:**
+- "AppDynamics **Custom Dashboard** revealed that 30% of users had missing 'roles' claim in JWT tokens"
+- "**Business Transaction analysis** showed failure pattern: contractor accounts vs full-time employees"
+- "Used **JWT.io** to decode and compare working vs failing JWT tokens from AppDynamics transaction details"
+- "Found the code was doing `new HashSet<>(roles)` without checking if roles was null"
+- "AppDynamics confirmed: `NullPointerException: Cannot invoke java.util.List.iterator() because roles is null`"
+
+**4. Solution Implementation:**
+- "I fixed the issue by adding **defensive null checks** for all JWT claim extractions"
+- "Implemented **default role assignment** when roles claim is missing"
+- "Added comprehensive **unit tests** to cover null/missing claim scenarios"
+- "Also fixed similar issues for email and username extraction"
+
+**5. Deployment & Results:**
+- "Deployed from feature branch → hotfix branch → production during low-traffic window"
+- "After deployment, achieved:**
+  - "100% login success rate"
+  - "Zero NullPointerException errors"
+  - "Helpdesk tickets reduced from 50+ to 0 per day"
+  - "300+ engineers can now reliably access the portal"
+
+**Key Interview Points:**
+- ✅ **Quick Diagnosis:** Used proper logging and debugging techniques
+- ✅ **Root Cause Analysis:** Identified exact line and condition causing NPE
+- ✅ **Defensive Programming:** Added comprehensive null checks and error handling
+- ✅ **Testing:** Implemented unit tests to prevent regression
+- ✅ **Business Impact:** Quantified user experience improvement and support reduction
+
+---
+
+## Key Technical Accomplishments
+
+1. **Designed and implemented** a scalable microservices architecture serving 1000+ internal users
+2. **Integrated** OAuth2/JWT security with Okta for enterprise authentication
+3. **Implemented** event-driven architecture with Kafka for asynchronous processing
+4. **Developed** polyglot persistence strategy with Oracle and MongoDB
+5. **Built** resilient system with circuit breakers, retries, and failover mechanisms
+6. **Established** comprehensive CI/CD pipeline with automated testing and deployment
+7. **Created** hybrid frontend architecture combining Angular and React
+8. **Achieved** 99.9% uptime with comprehensive monitoring and alerting
+
+---
+
+## Metrics & Achievements
+
+- **Performance:** Average API response time < 200ms
+- **Availability:** 99.9% uptime over 12 months
+- **Scalability:** Handles 10,000+ concurrent users
+- **Security:** Zero security incidents since launch
+- **Cost Savings:** 20% reduction in cloud infrastructure costs
+- **Developer Productivity:** 50% faster feature delivery with CI/CD
+- **User Satisfaction:** 95% positive feedback from internal users
+
+---
+
+*This document serves as a comprehensive guide for technical interviews focusing on the OneUX-CPP-CMP project. Each section provides detailed talking points that demonstrate technical expertise, architectural understanding, and business impact.*

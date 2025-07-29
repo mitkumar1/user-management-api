@@ -1,0 +1,100 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.dashboard-header {
+  margin-bottom: 30px;
+  
+  h1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    color: #333;
+    font-size: 32px;
+  }
+}
+
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.welcome-card {
+  max-width: 600px;
+  margin: 0 auto;
+  
+  mat-card-header {
+    mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  }
+  
+  .roles {
+    margin-top: 15px;
+    
+    p {
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+  }
+}
+
+.quick-actions {
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+}
+
+.action-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  
+  .action-card {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    
+    mat-card-header {
+      flex-shrink: 0;
+      
+      mat-card-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+      }
+    }
+    
+    mat-card-content {
+      flex: 1;
+      
+      p {
+        color: rgba(0, 0, 0, 0.6);
+        margin: 0;
+      }
+    }
+    
+    mat-card-actions {
+      flex-shrink: 0;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .action-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .welcome-card {
+    margin: 0;
+  }
+}

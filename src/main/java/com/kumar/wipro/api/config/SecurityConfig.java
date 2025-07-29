@@ -58,10 +58,10 @@ public class SecurityConfig {
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeHttpRequests(authz -> authz
-                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/api/v1/users/register").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/v1/users/{username}").permitAll()
+                    .requestMatchers("/api/users/register").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/users/{username}").permitAll()
                     .requestMatchers("/actuator/**").permitAll()
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/error").permitAll()

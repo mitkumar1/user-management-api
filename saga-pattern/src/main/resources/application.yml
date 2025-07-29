@@ -1,0 +1,158 @@
+# Spring Boot Application Configuration
+spring:
+  application:
+    name: saga-pattern-demo
+    
+  # Database Configuration
+  datasource:
+    url: jdbc:h2:mem:sagadb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+    
+  # JPA Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+      format_sql: true
+    show-sql: true
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        
+  # H2 Console (for development)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    time-zone: UTC
+    
+  # Async Configuration
+  task:
+    execution:
+      pool:
+        core-size: 8
+        max-size: 16
+        queue-capacity: 100
+        keep-alive: 60s
+      thread-name-prefix: saga-async-
+      
+# Server Configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+    
+# Management Endpoints (Actuator)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,threaddump
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+    metrics:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      sla:
+        http.server.requests: 10ms, 50ms, 100ms, 200ms, 500ms
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.saga: DEBUG
+    org.springframework.context.event: DEBUG
+    org.springframework.transaction: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/saga-pattern-demo.log
+
+# Application Specific Configuration
+saga:
+  timeout:
+    payment: 30s
+    inventory: 15s
+    shipping: 45s
+  retry:
+    max-attempts: 3
+    delay: 2s
+  compensation:
+    enabled: true
+    timeout: 60s
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: production
+      
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sagadb
+    username: ${DB_USERNAME:saga_user}
+    password: ${DB_PASSWORD:saga_password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 600000
+      
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    
+  h2:
+    console:
+      enabled: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+logging:
+  level:
+    com.saga: INFO
+    org.springframework.context.event: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+
+---
+# Test Profile  
+spring:
+  config:
+    activate:
+      on-profile: test
+      
+  datasource:
+    url: jdbc:h2:mem:testdb
+    
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
