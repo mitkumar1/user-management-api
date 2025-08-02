@@ -54,26 +54,33 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        return http
+                .cors(cors -> cors.disable())
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(exceptions -> exceptions
+                    .authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                )
+                .sessionManagement(session -> session
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(authz -> authz
+                    .requestMatchers("/api/v1/auth/**").permitAll()
                     .requestMatchers("/api/auth/**").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/api/users/register").permitAll()
+                    .requestMatchers("/api/v1/users/register").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/users/{username}").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/users/{username}").permitAll()
                     .requestMatchers("/actuator/**").permitAll()
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/error").permitAll()
                     .anyRequest().authenticated()
-                );
-
-        // Fix H2 console frame options
-        http.headers().frameOptions().disable();
-
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
+                )
+                .headers(headers -> headers
+                    .frameOptions(frameOptions -> frameOptions.disable())
+                )
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 }

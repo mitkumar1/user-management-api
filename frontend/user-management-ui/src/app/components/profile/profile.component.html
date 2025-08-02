@@ -73,7 +73,7 @@
             </h3>
             
             <div class="roles-container">
-              <mat-chip-list>
+              <mat-chip-set>
                 <mat-chip *ngFor="let role of user.roles" 
                          [color]="role.name === 'ROLE_ADMIN' ? 'warn' : 'primary'" 
                          selected>
@@ -82,7 +82,7 @@
                   </mat-icon>
                   {{ role.name.replace('ROLE_', '') }}
                 </mat-chip>
-              </mat-chip-list>
+              </mat-chip-set>
               
               <div class="role-description" *ngIf="isAdmin()">
                 <mat-icon>info</mat-icon>

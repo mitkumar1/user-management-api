@@ -1,0 +1,81 @@
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven-3.9.0'
+        jdk 'JDK-17'
+        nodejs 'NodeJS-18'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Checking out code...'
+                checkout scm
+            }
+        }
+        
+        stage('Validate Project') {
+            steps {
+                echo 'Validating Maven project...'
+                bat 'mvn validate'
+            }
+        }
+        
+        stage('Compile Backend') {
+            steps {
+                echo 'Compiling Java code...'
+                bat 'mvn clean compile'
+            }
+        }
+        
+        stage('Test Backend') {
+            steps {
+                echo 'Running tests...'
+                bat 'mvn test'
+            }
+            post {
+                always {
+                    publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                echo 'Packaging application...'
+                bat 'mvn package -DskipTests'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Frontend Build') {
+            steps {
+                dir('frontend/user-management-ui') {
+                    echo 'Installing npm dependencies...'
+                    bat 'npm install'
+                    
+                    echo 'Building Angular application...'
+                    bat 'npm run build'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo 'Cleaning workspace...'
+            cleanWs()
+        }
+        success {
+            echo 'Build completed successfully!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}

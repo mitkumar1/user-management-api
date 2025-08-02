@@ -3,6 +3,7 @@ com\kumar\wipro\api\dto\LoginRequest.class
 com\kumar\wipro\api\model\Role.class
 com\kumar\wipro\api\model\RoleName.class
 com\kumar\wipro\api\model\User.class
+com\kumar\wipro\api\config\CorsConfig.class
 com\kumar\wipro\api\repository\UserRepository.class
 com\kumar\wipro\api\dto\ApiResponse.class
 com\kumar\wipro\api\controller\UserController.class

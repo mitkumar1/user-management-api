@@ -64,24 +64,24 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "user-management-ui:build",
+            "proxyConfig": "proxy.conf.json"
+          },
           "configurations": {
             "production": {
-              "buildTarget": "user-management-ui:build:production"
+              "browserTarget": "user-management-ui:build:production"
             },
             "development": {
-              "buildTarget": "user-management-ui:build:development"
+              "browserTarget": "user-management-ui:build:development"
             }
           },
-          "defaultConfiguration": "development",
-          "options": {
-            "buildTarget": "user-management-ui:build:development",
-            "proxyConfig": "proxy.conf.json"
-          }
+          "defaultConfiguration": "development"
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "user-management-ui:build"
+            "browserTarget": "user-management-ui:build"
           }
         },
         "test": {
@@ -110,4 +110,5 @@
   "cli": {
     "analytics": "924d0b9c-29fb-4b0b-857e-a2122567053a"
   }
+}
 }

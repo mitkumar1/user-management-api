@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  # Production Database
+  db-prod:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: userapi_prod
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - prod_db_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    networks:
+      - prod-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  # Redis for Session Management (Production)
+  redis-prod:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+    networks:
+      - prod-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Backend API - Production
+  api-prod:
+    image: user-management-api:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-prod:5432/userapi_prod
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis-prod
+      REDIS_PORT: 6379
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-prod
+      - redis-prod
+    networks:
+      - prod-network
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # Frontend - Production
+  ui-prod:
+    image: user-management-ui:latest
+    ports:
+      - "3000:80"
+    environment:
+      API_URL: https://api.yourdomain.com
+    depends_on:
+      - api-prod
+    networks:
+      - prod-network
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+
+  # Nginx Load Balancer & Reverse Proxy
+  nginx-prod:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/production.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - api-prod
+      - ui-prod
+    networks:
+      - prod-network
+    restart: unless-stopped
+
+  # Monitoring - Prometheus
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - prod-network
+    restart: unless-stopped
+
+  # Monitoring - Grafana
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - prod-network
+    restart: unless-stopped
+
+volumes:
+  prod_db_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  prod-network:
+    driver: bridge

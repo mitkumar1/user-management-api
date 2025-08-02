@@ -20,13 +20,13 @@
         <p>You are logged in as: <strong>{{ user.username }}</strong></p>
         <div class="roles" *ngIf="user.roles && user.roles.length > 0">
           <p>Your roles:</p>
-          <mat-chip-list>
+          <mat-chip-set>
             <mat-chip *ngFor="let role of user.roles" 
                      [color]="role.name === 'ROLE_ADMIN' ? 'warn' : 'primary'" 
                      selected>
               {{ role.name.replace('ROLE_', '') }}
             </mat-chip>
-          </mat-chip-list>
+          </mat-chip-set>
         </div>
       </mat-card-content>
       

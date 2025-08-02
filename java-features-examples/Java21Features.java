@@ -167,38 +167,74 @@ public class Java21Features {
         // SequencedList methods
         List<String> list = new ArrayList<>(List.of("first", "second", "third"));
         System.out.println("Original list: " + list);
-        
-        // New methods in Java 21
+
+        // The following methods require Java 21 and may require --enable-preview
+        // Uncomment if running with preview features enabled
+        /*
         System.out.println("First element: " + list.getFirst());
         System.out.println("Last element: " + list.getLast());
-        
         list.addFirst("new-first");
         list.addLast("new-last");
         System.out.println("After adding: " + list);
-        
         list.removeFirst();
         list.removeLast();
         System.out.println("After removing: " + list);
-        
-        // Reversed view
         List<String> reversed = list.reversed();
         System.out.println("Reversed view: " + reversed);
-        
+        */
+
+        // Standard Java alternatives for compatibility
+        System.out.println("First element (standard): " + list.get(0));
+        System.out.println("Last element (standard): " + list.get(list.size() - 1));
+        list.add(0, "new-first");
+        list.add("new-last");
+        System.out.println("After adding (standard): " + list);
+        list.remove(0);
+        list.remove(list.size() - 1);
+        System.out.println("After removing (standard): " + list);
+        List<String> reversed = new ArrayList<>(list);
+        Collections.reverse(reversed);
+        System.out.println("Reversed view (standard): " + reversed);
+
         // SequencedSet methods
         LinkedHashSet<String> set = new LinkedHashSet<>(List.of("a", "b", "c"));
         System.out.println("Original set: " + set);
+
+        // The following methods require Java 21 and may require --enable-preview
+        /*
         System.out.println("First: " + set.getFirst());
         System.out.println("Last: " + set.getLast());
-        
+        */
+
+        // Standard Java alternatives for compatibility
+        String first = set.iterator().next();
+        String last = null;
+        for (String s : set) last = s;
+        System.out.println("First (standard): " + first);
+        System.out.println("Last (standard): " + last);
+
         // SequencedMap methods
         LinkedHashMap<String, Integer> map = new LinkedHashMap<>();
         map.put("first", 1);
         map.put("second", 2);
         map.put("third", 3);
-        
+
         System.out.println("Original map: " + map);
+
+        // The following methods require Java 21 and may require --enable-preview
+        /*
         System.out.println("First entry: " + map.firstEntry());
         System.out.println("Last entry: " + map.lastEntry());
+        */
+
+        // Standard Java alternatives for compatibility
+        Map.Entry<String, Integer> firstEntry = null, lastEntry = null;
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            if (firstEntry == null) firstEntry = entry;
+            lastEntry = entry;
+        }
+        System.out.println("First entry (standard): " + firstEntry);
+        System.out.println("Last entry (standard): " + lastEntry);
         System.out.println();
     }
     

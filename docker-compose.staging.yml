@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Staging Database
+  db-staging:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: userapi_staging
+      POSTGRES_USER: ${DB_USER:-staginguser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-stagingpass}
+    volumes:
+      - staging_db_data:/var/lib/postgresql/data
+    networks:
+      - staging-network
+    restart: unless-stopped
+
+  # Backend API - Staging
+  api-staging:
+    image: user-management-api:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: staging
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db-staging:5432/userapi_staging
+      SPRING_DATASOURCE_USERNAME: ${DB_USER:-staginguser}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-stagingpass}
+      JWT_SECRET: ${JWT_SECRET:-staging-secret-key-change-this}
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db-staging
+    networks:
+      - staging-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend - Staging
+  ui-staging:
+    image: user-management-ui:latest
+    ports:
+      - "4200:80"
+    environment:
+      API_URL: http://api-staging:8080
+    depends_on:
+      - api-staging
+    networks:
+      - staging-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx-staging:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/staging.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api-staging
+      - ui-staging
+    networks:
+      - staging-network
+    restart: unless-stopped
+
+volumes:
+  staging_db_data:
+
+networks:
+  staging-network:
+    driver: bridge

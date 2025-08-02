@@ -1,0 +1,22 @@
+# Dockerfile for Integration Tests
+FROM node:18-alpine
+
+WORKDIR /tests
+
+# Copy test files
+COPY tests/ ./
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Install testing tools
+RUN npm install -g newman postman-collection-transformer
+
+# Copy API collection for testing
+COPY User-Management-API.postman_collection.json ./
+
+# Make test script executable
+RUN chmod +x test-runner.sh
+
+CMD ["./test-runner.sh"]

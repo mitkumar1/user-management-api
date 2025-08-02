@@ -9,3 +9,36 @@ build/
 coverage/
 *.class
 *.jar
+
+# Angular cache
+.angular/cache/
+
+# Jenkins and CI/CD
+.jenkins/
+jenkins.log
+**/target/surefire-reports/
+**/target/site/
+**/logs/
+.scannerwork/
+
+# Docker
+docker-compose.override.yml
+.docker/
+
+# Environment files
+.env.local
+.env.staging
+.env.production
+
+# SSL certificates
+ssl/
+certs/
+
+# Backup files
+backups/
+*.backup
+
+# Monitoring data
+monitoring/data/
+grafana/data/
+prometheus/data/

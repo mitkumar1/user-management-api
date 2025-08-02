@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Database for testing
+  test-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: userapi_test
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+
+  # Backend API for testing
+  api-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: test
+      SPRING_DATASOURCE_URL: jdbc:postgresql://test-db:5432/userapi_test
+      SPRING_DATASOURCE_USERNAME: testuser
+      SPRING_DATASOURCE_PASSWORD: testpass
+    ports:
+      - "8081:8080"
+    depends_on:
+      - test-db
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        sleep 10 &&
+        java -jar /app/user-management-api.jar
+      "
+
+  # Integration test runner
+  integration-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    environment:
+      API_BASE_URL: http://api-test:8080
+    depends_on:
+      - api-test
+    command: >
+      sh -c "
+        echo 'Waiting for API to be ready...' &&
+        sleep 30 &&
+        npm test
+      "
+
+networks:
+  default:
+    name: user-management-test
