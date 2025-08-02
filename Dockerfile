@@ -1,39 +1,38 @@
-# Use OpenJDK 21 as base image
-FROM openjdk:21-jdk-slim
+# Use Eclipse Temurin JDK 21 as base image for building
+FROM eclipse-temurin:21-jdk-alpine AS builder
+
+# Install Maven
+RUN apk add --no-cache maven
 
 # Set working directory
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml first (for better caching)
-COPY .mvn/ .mvn/
-COPY mvnw pom.xml ./
-
-# Make mvnw executable
-RUN chmod +x ./mvnw
+# Copy pom.xml first (for better caching)
+COPY pom.xml ./
 
 # Download dependencies (this layer will be cached if pom.xml doesn't change)
-RUN ./mvnw dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Copy source code
 COPY src ./src
 
 # Build the application
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # Create a new stage for the runtime
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre-alpine
 
 # Install curl for health checks
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache curl
 
 # Set working directory
 WORKDIR /app
 
 # Copy the built JAR from the previous stage
-COPY --from=0 /app/target/user-management-api-*.jar app.jar
+COPY --from=builder /app/target/user-management-api-*.jar app.jar
 
 # Create a non-root user
-RUN addgroup --system spring && adduser --system spring --ingroup spring
+RUN addgroup -g 1001 -S spring && adduser -u 1001 -S spring -G spring
 USER spring:spring
 
 # Expose port
