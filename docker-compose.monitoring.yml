@@ -20,16 +20,41 @@ services:
   # Database
   postgres:
     image: postgres:15-alpine
+    container_name: postgres-prod
     environment:
       POSTGRES_DB: userdb
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: SecureP@ssw0rd123
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - monitoring
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbuser -d userdb"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8082:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - monitoring
+    depends_on:
+      - postgres
 
   # Prometheus for metrics collection
   prometheus:
@@ -139,6 +164,7 @@ services:
 
 volumes:
   postgres_data:
+  pgadmin_data:
   sonar_postgres_data:
   prometheus_data:
   grafana_data:

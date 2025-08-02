@@ -2,12 +2,44 @@
 
 ## Overview
 This guide sets up comprehensive monitoring and code quality analysis for the User Management API using:
+- **PostgreSQL**: Production database with monitoring
 - **Grafana**: Dashboards and visualization
 - **AppDynamics**: Application Performance Monitoring (APM)
 - **Dynatrace**: Full-stack monitoring and AI-powered insights
 - **SonarQube**: Code quality and security analysis
 
-## 1. SonarQube Setup
+## 1. PostgreSQL Production Database
+
+### Quick Setup
+
+```bash
+# Windows: Run setup script
+setup-postgres.bat
+
+# Linux/Mac: Use Docker
+docker-compose -f docker-compose.monitoring.yml up -d postgres pgadmin
+```
+
+### Database Information
+- **Host**: localhost:5432
+- **Database**: userdb
+- **Username**: dbuser
+- **Password**: SecureP@ssw0rd123
+- **pgAdmin**: http://localhost:8082 (admin@example.com/admin123)
+
+### Backup & Restore
+
+```bash
+# Windows
+backup-postgres.bat
+restore-postgres.bat backup_file.zip
+
+# Linux/Mac
+./backup-postgres.sh
+./restore-postgres.sh backup_file.sql.gz
+```
+
+## 2. SonarQube Setup
 
 ### Local SonarQube with Docker
 
