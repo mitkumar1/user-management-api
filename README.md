@@ -8,8 +8,6 @@ A Spring Boot REST API with JWT authentication, role-based security, and **compr
 ```bash
 # Test API with H2 database - handles everything automatically
 quick-test.bat
-```
-
 ### Option 2: Full Monitoring Stack (15 minutes, requires Docker)
 ```bash
 # Complete monitoring with Grafana, Prometheus, PostgreSQL
@@ -227,6 +225,30 @@ load-test.bat --users 200 --duration 300s
 load-test.bat --users 500 --duration 60s --ramp-up 30s
 ```
 
+### 🎯 Professional JMeter Load Testing
+```bash
+# Windows - Professional load testing with detailed reporting
+run-jmeter-test.bat 50 60 300
+
+# Linux/Mac - Professional load testing
+./run-jmeter-test.sh 50 60 300
+
+# Parameters: [users] [ramp_time_seconds] [duration_seconds]
+# Generates: HTML reports, performance charts, detailed metrics
+```
+
+### 🔍 SonarQube Code Quality Analysis
+```bash
+# Windows - Comprehensive code quality analysis
+run-sonarqube-analysis.bat
+
+# Linux/Mac - Comprehensive code quality analysis
+./run-sonarqube-analysis.sh
+
+# Analyzes: bugs, vulnerabilities, code smells, coverage, duplications
+# Quality Gates: A/B ratings for production readiness
+```
+
 ### 🔍 Monitoring During Tests
 - **Grafana**: http://localhost:3000 (admin/admin)
 - **Prometheus**: http://localhost:9090
@@ -333,7 +355,7 @@ curl http://localhost:8080/actuator/prometheus
 | **🗃️ pgAdmin** | http://localhost:8082 | admin@example.com / admin123 | Database Management |
 | **📈 Grafana** | http://localhost:3000 | admin / admin | Metrics Visualization |
 | **🔍 Prometheus** | http://localhost:9090 | None | Metrics Collection |
-| **🔍 SonarQube** | http://localhost:9000 | admin / admin | Code Quality |
+| **🔍 SonarQube** | http://localhost:9000 | admin / admin | Code Quality & Security Analysis |
 
 ### 🏃‍♂️ Load Testing Commands
 ```bash
@@ -344,11 +366,16 @@ load-test.bat --users 10 --duration 30s
 # Production simulation (100 users, 2 minutes) 
 load-test.bat --users 100 --duration 120s
 
-# Stress test (500 users, 1 minute)
-load-test.bat --users 500 --duration 60s
+# Professional JMeter testing (50 users, 60s ramp, 5 min duration)
+run-jmeter-test.bat 50 60 300
+
+# Code quality analysis
+run-sonarqube-analysis.bat
 
 # Linux/Mac
 ./load-test.sh --users 100 --duration 60s
+./run-jmeter-test.sh 50 60 300
+./run-sonarqube-analysis.sh
 ```
 
 ### 📊 Key Metrics to Monitor
@@ -358,6 +385,9 @@ load-test.bat --users 500 --duration 60s
 - **Memory Usage**: < 1GB heap usage
 - **Database Connections**: Monitor pool utilization
 - **Active Users**: Track concurrent user sessions
+- **Code Quality**: SonarQube A/B ratings (bugs, vulnerabilities, code smells)
+- **Test Coverage**: > 80% unit test coverage
+- **Technical Debt**: < 10 code smells, 0 critical issues
 
 ### 🎯 Performance Targets
 ```yaml
@@ -371,15 +401,31 @@ Load Capacity:
   Concurrent Users: 500+
   Requests/Second: 1000+
   Daily Active Users: 10,000+
+
+Quality Targets:
+  SonarQube Rating: A or B
+  Code Coverage: > 80%
+  Bugs: 0 critical/major
+  Security Vulnerabilities: 0
 ```
 
 ### 📈 Monitoring Integration
 - **Grafana Dashboards**: Pre-configured for API metrics
 - **Prometheus Alerts**: Automatic alerting for issues
-- **SonarQube Analysis**: Code quality and security scanning
+- **SonarQube Analysis**: Code quality and security scanning with quality gates
+- **JMeter Load Testing**: Professional load testing with HTML reports
 - **AppDynamics Ready**: APM integration available
 - **Dynatrace Compatible**: Full-stack monitoring ready
 - **ELK Stack Ready**: Logging integration prepared
+- **Quality Gates**: Automated code quality checks and thresholds
+
+### 🧪 Testing Tools Integration
+- **Unit Testing**: JUnit 5 with 80%+ coverage requirement
+- **Integration Testing**: Spring Boot Test with TestContainers
+- **Load Testing**: JMeter professional test plans with realistic scenarios
+- **Code Quality**: SonarQube with comprehensive quality gates
+- **Security Testing**: OWASP dependency check and vulnerability scanning
+- **Performance Monitoring**: Real-time metrics with Grafana/Prometheus
 
 For complete monitoring setup and testing guide, see: `MONITORING-TESTING-GUIDE.md`
 
@@ -543,6 +589,9 @@ curl http://localhost:8080/actuator/health
 - 📊 **`load-test.bat`** - Comprehensive load testing
 - 🔍 **`test-monitoring-stack.bat`** - Full stack verification
 - 🗃️ **`test-postgres-connection.bat`** - Database connectivity test
+- 🎯 **`run-jmeter-test.bat`** - Professional JMeter load testing
+- 🔍 **`run-sonarqube-analysis.bat`** - Code quality and security analysis
+- 📈 **`jmeter-load-test.jmx`** - JMeter test plan configuration
 
 ## 🔄 Development Workflow
 
@@ -561,7 +610,10 @@ mvn sonar:sonar
 # 4. Load test your changes
 load-test.bat --users 50 --duration 60s
 
-# 5. Commit and push
+# 5. Run JMeter professional testing
+run-jmeter-test.bat 30 30 180
+
+# 6. Commit and push
 git add . && git commit -m "Add awesome feature"
 git push origin feature/your-awesome-feature
 ```
@@ -569,9 +621,10 @@ git push origin feature/your-awesome-feature
 ### 📋 Quality Gates
 - ✅ **Unit Tests**: 80%+ code coverage
 - ✅ **Integration Tests**: All endpoints tested
-- ✅ **SonarQube**: No critical issues
-- ✅ **Load Testing**: Handles 500+ concurrent users
-- ✅ **Security**: No vulnerabilities detected
+- ✅ **SonarQube**: A/B quality rating, 0 critical issues
+- ✅ **Load Testing**: Handles 500+ concurrent users (JMeter validated)
+- ✅ **Security**: No vulnerabilities detected (SonarQube + OWASP)
+- ✅ **Performance**: < 200ms response time (95th percentile)
 - ✅ **Code Review**: 1 approval required
 
 ## 📄 License
