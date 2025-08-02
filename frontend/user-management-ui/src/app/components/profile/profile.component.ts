@@ -30,6 +30,10 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  refreshProfile(): void {
+    this.loadProfile();
+  }
+
   isAdmin(): boolean {
     return this.user?.roles?.some(role => role.name === 'ROLE_ADMIN') || false;
   }
