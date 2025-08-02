@@ -1,0 +1,343 @@
+pipeline {
+    agent any
+    
+    tools {
+        maven 'Maven3'
+        jdk 'JDK17'
+    }
+    
+    environment {
+        SONAR_TOKEN = credentials('sonar-token')
+        DOCKER_REGISTRY = 'your-registry.com'
+        APP_NAME = 'user-management-api'
+        MONITORING_PROFILE = 'monitoring'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+                script {
+                    env.GIT_COMMIT_SHORT = sh(
+                        script: "git rev-parse --short HEAD",
+                        returnStdout: true
+                    ).trim()
+                }
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                echo '🔨 Building application...'
+                sh 'mvn clean compile'
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                echo '🧪 Running tests...'
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    publishTestResults testResultsPattern: 'target/surefire-reports/*.xml'
+                    publishCoverage adapters: [
+                        jacocoAdapter('target/site/jacoco/jacoco.xml')
+                    ], sourceFileResolver: sourceFiles('STORE_LAST_BUILD')
+                }
+            }
+        }
+        
+        stage('SonarQube Analysis') {
+            steps {
+                echo '🔍 Running SonarQube analysis...'
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        mvn clean verify sonar:sonar \
+                            -Dsonar.projectKey=user-management-api \
+                            -Dsonar.projectName="User Management API" \
+                            -Dsonar.host.url=$SONAR_HOST_URL \
+                            -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
+            }
+        }
+        
+        stage('Quality Gate') {
+            steps {
+                echo '🚪 Checking SonarQube Quality Gate...'
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        
+        stage('Security Scan') {
+            steps {
+                echo '🔒 Running security scan...'
+                sh 'mvn org.owasp:dependency-check-maven:check'
+            }
+            post {
+                always {
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target',
+                        reportFiles: 'dependency-check-report.html',
+                        reportName: 'OWASP Dependency Check Report'
+                    ])
+                }
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                echo '📦 Packaging application...'
+                sh 'mvn package -DskipTests'
+            }
+            post {
+                success {
+                    archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                }
+            }
+        }
+        
+        stage('Docker Build') {
+            steps {
+                echo '🐳 Building Docker image...'
+                script {
+                    def imageName = "${APP_NAME}:${BUILD_NUMBER}"
+                    def latestImage = "${APP_NAME}:latest"
+                    
+                    sh "docker build -t ${imageName} ."
+                    sh "docker tag ${imageName} ${latestImage}"
+                    
+                    // Save image info for later stages
+                    env.DOCKER_IMAGE = imageName
+                }
+            }
+        }
+        
+        stage('Docker Security Scan') {
+            steps {
+                echo '🔒 Scanning Docker image for vulnerabilities...'
+                script {
+                    // Using Trivy for container scanning
+                    sh """
+                        docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+                            -v \$(pwd):/tmp aquasec/trivy:latest image \
+                            --format json --output /tmp/trivy-report.json \
+                            ${env.DOCKER_IMAGE}
+                    """
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-report.json', allowEmptyArchive: true
+                }
+            }
+        }
+        
+        stage('Performance Test') {
+            when {
+                anyOf {
+                    branch 'master'
+                    branch 'main'
+                    branch 'develop'
+                }
+            }
+            steps {
+                echo '⚡ Running performance tests...'
+                script {
+                    // Start application in background for testing
+                    sh """
+                        docker run -d --name ${APP_NAME}-test \
+                            -p 8080:8080 \
+                            -e SPRING_PROFILES_ACTIVE=${MONITORING_PROFILE} \
+                            ${env.DOCKER_IMAGE}
+                    """
+                    
+                    // Wait for application to start
+                    sh 'sleep 30'
+                    
+                    // Run performance tests with JMeter
+                    sh '''
+                        if [ -f "src/test/jmeter/load-test.jmx" ]; then
+                            jmeter -n -t src/test/jmeter/load-test.jmx \
+                                -l target/jmeter-results.jtl \
+                                -e -o target/jmeter-report
+                        fi
+                    '''
+                }
+            }
+            post {
+                always {
+                    sh "docker stop ${APP_NAME}-test || true"
+                    sh "docker rm ${APP_NAME}-test || true"
+                    
+                    publishHTML([
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'target/jmeter-report',
+                        reportFiles: 'index.html',
+                        reportName: 'JMeter Performance Report'
+                    ])
+                }
+            }
+        }
+        
+        stage('Deploy to Development') {
+            when {
+                anyOf {
+                    branch 'develop'
+                    branch 'feature/*'
+                }
+            }
+            steps {
+                echo '🚀 Deploying to Development environment...'
+                script {
+                    // Deploy with monitoring enabled
+                    sh """
+                        docker run -d --name ${APP_NAME}-dev \
+                            -p 8080:8080 \
+                            -e SPRING_PROFILES_ACTIVE=${MONITORING_PROFILE} \
+                            --network monitoring_monitoring \
+                            ${env.DOCKER_IMAGE}
+                    """
+                }
+            }
+        }
+        
+        stage('Deploy to Production') {
+            when {
+                anyOf {
+                    branch 'master'
+                    branch 'main'
+                }
+            }
+            steps {
+                echo '🌟 Deploying to Production environment...'
+                input message: 'Deploy to Production?', ok: 'Deploy'
+                
+                script {
+                    // Deploy to production with full monitoring
+                    sh """
+                        docker run -d --name ${APP_NAME}-prod \
+                            -p 8080:8080 \
+                            -e SPRING_PROFILES_ACTIVE=production,monitoring \
+                            --network monitoring_monitoring \
+                            ${env.DOCKER_IMAGE}
+                    """
+                }
+            }
+        }
+        
+        stage('Monitoring Setup') {
+            steps {
+                echo '📊 Setting up monitoring and alerting...'
+                script {
+                    // Configure Grafana dashboards
+                    sh '''
+                        # Import custom dashboards
+                        if [ -f "monitoring/grafana/dashboards/app-dashboard.json" ]; then
+                            echo "Dashboard configuration found"
+                        fi
+                    '''
+                    
+                    // Setup AppDynamics if agent is available
+                    sh '''
+                        if [ -d "monitoring/appd" ]; then
+                            echo "AppDynamics agent configuration found"
+                        fi
+                    '''
+                }
+            }
+        }
+        
+        stage('Health Check') {
+            steps {
+                echo '🏥 Running health checks...'
+                script {
+                    // Wait for application to be ready
+                    sh 'sleep 15'
+                    
+                    // Check application health
+                    sh '''
+                        curl -f http://localhost:8080/actuator/health || exit 1
+                        curl -f http://localhost:8080/actuator/prometheus || exit 1
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            echo '🧹 Cleaning up...'
+            cleanWs()
+            
+            // Clean up test containers
+            sh """
+                docker stop ${APP_NAME}-test || true
+                docker rm ${APP_NAME}-test || true
+            """
+        }
+        
+        success {
+            echo '✅ Pipeline completed successfully!'
+            
+            // Send notifications
+            emailext (
+                subject: "✅ SUCCESS: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                <h2>Build Successful! 🎉</h2>
+                <p><strong>Project:</strong> ${env.JOB_NAME}</p>
+                <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                <p><strong>Git Commit:</strong> ${env.GIT_COMMIT_SHORT}</p>
+                
+                <h3>Monitoring URLs:</h3>
+                <ul>
+                    <li><a href="http://localhost:3000">Grafana Dashboard</a></li>
+                    <li><a href="http://localhost:9000">SonarQube</a></li>
+                    <li><a href="http://localhost:8080/actuator/health">Application Health</a></li>
+                </ul>
+                
+                <p>Check the application metrics and dashboards!</p>
+                """,
+                to: "${env.CHANGE_AUTHOR_EMAIL}",
+                mimeType: 'text/html'
+            )
+        }
+        
+        failure {
+            echo '❌ Pipeline failed!'
+            
+            emailext (
+                subject: "❌ FAILED: ${env.JOB_NAME} - Build #${env.BUILD_NUMBER}",
+                body: """
+                <h2>Build Failed! 💥</h2>
+                <p><strong>Project:</strong> ${env.JOB_NAME}</p>
+                <p><strong>Build Number:</strong> ${env.BUILD_NUMBER}</p>
+                <p><strong>Git Commit:</strong> ${env.GIT_COMMIT_SHORT}</p>
+                
+                <p>Please check the logs and fix the issues:</p>
+                <ul>
+                    <li>SonarQube Quality Gate</li>
+                    <li>Test Results</li>
+                    <li>Security Vulnerabilities</li>
+                </ul>
+                
+                <p><a href="${env.BUILD_URL}">View Build Details</a></p>
+                """,
+                to: "${env.CHANGE_AUTHOR_EMAIL}",
+                mimeType: 'text/html'
+            )
+        }
+        
+        unstable {
+            echo '⚠️ Pipeline completed with warnings!'
+        }
+    }
+}
