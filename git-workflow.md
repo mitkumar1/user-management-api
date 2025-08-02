@@ -35,6 +35,11 @@ git push origin feature/your-feature-name
 4. Request review from team members
 5. Wait for approval before merging
 
+**Note**: If using Jenkins, ensure your Jenkins job is configured for multi-branch:
+- Job type: "Multibranch Pipeline" 
+- Branch discovery: "All branches" or "*/master */feature/*"
+- This ensures Jenkins builds and tests your feature branch
+
 ### 4. After PR Approval
 ```bash
 # Switch back to master
@@ -52,6 +57,23 @@ git push origin --delete feature/your-feature-name
 
 To enforce PR approval requirements, configure these settings on GitHub:
 
+### Method 1: Using New Rulesets (Recommended)
+1. Go to: Settings → Rules → Rulesets → New branch ruleset
+2. **Ruleset Name**: `Protect Master Branch`
+3. **Enforcement status**: Active
+4. **Target branches**: Add `master` (or use "Include default branch")
+5. **Enable these rules**:
+   - ✅ **Require a pull request before merging**
+     - Required number of approvals: `1`
+     - ✅ Dismiss stale PR approvals when new commits are pushed
+   - ✅ **Restrict updates** (prevents direct pushes to master)
+   - ✅ **Block force pushes**
+   - ✅ **Require status checks to pass**
+     - Add status check: `validate` (from GitHub Actions)
+   - ✅ **Restrict deletions** (optional but recommended)
+   - ✅ **Require linear history** (optional - keeps clean history)
+
+### Method 2: Classic Branch Protection (Alternative)
 1. Go to: Settings → Branches → Add rule
 2. Branch name pattern: `master`
 3. Enable: "Require a pull request before merging"

@@ -21,6 +21,7 @@ function Show-Usage {
     Write-Host "  branches              - List all branches"
     Write-Host "  cleanup               - Clean up merged branches"
     Write-Host "  pr-ready              - Check if ready for PR"
+    Write-Host "  test-protection       - Test branch protection rules"
     Write-Host ""
 }
 
@@ -99,6 +100,13 @@ function Check-PrReady {
     $currentBranch = git branch --show-current
     Write-Host "Checking if '$currentBranch' is ready for PR..." -ForegroundColor Green
     
+    # Check if we're on master (shouldn't create PR from master)
+    if ($currentBranch -eq "master") {
+        Write-Host "❌ You're on master branch. Create a feature branch first:" -ForegroundColor Red
+        Write-Host "  .\git-workflow.ps1 new-feature your-feature-name" -ForegroundColor Yellow
+        return
+    }
+    
     # Check if branch is pushed
     $remoteExists = git ls-remote --heads origin $currentBranch
     if (-not $remoteExists) {
@@ -132,6 +140,39 @@ function Check-PrReady {
     Write-Host "Create PR at: https://github.com/mitkumar1/user-management-api/compare/master...$currentBranch" -ForegroundColor Cyan
 }
 
+function Test-BranchProtection {
+    Write-Host "Testing branch protection rules..." -ForegroundColor Green
+    
+    # Check current branch
+    $currentBranch = git branch --show-current
+    if ($currentBranch -eq "master") {
+        Write-Host "⚠️  You're on master branch. Testing protection..." -ForegroundColor Yellow
+        
+        # Try to create a test commit (won't push, just test locally)
+        $testFile = "protection-test-$(Get-Date -Format 'yyyyMMdd-HHmmss').tmp"
+        "test" | Out-File $testFile
+        git add $testFile
+        git commit -m "test: protection rule test - will not push"
+        
+        Write-Host "Created test commit. Attempting to push to master..." -ForegroundColor Yellow
+        $pushResult = git push origin master 2>&1
+        
+        # Reset the test commit
+        git reset HEAD~1
+        Remove-Item $testFile -Force
+        
+        if ($pushResult -match "protected branch|GH006|denied") {
+            Write-Host "✅ Branch protection is working! Direct pushes to master are blocked." -ForegroundColor Green
+        } else {
+            Write-Host "❌ WARNING: Branch protection may not be configured correctly!" -ForegroundColor Red
+            Write-Host "Push result: $pushResult" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "Currently on branch: $currentBranch" -ForegroundColor Cyan
+        Write-Host "Switch to master to test protection: git checkout master" -ForegroundColor Yellow
+    }
+}
+
 # Main script logic
 switch ($Command.ToLower()) {
     "new-feature" { New-FeatureBranch -Name $BranchName }
@@ -141,5 +182,6 @@ switch ($Command.ToLower()) {
     "branches" { Show-Branches }
     "cleanup" { Cleanup-MergedBranches }
     "pr-ready" { Check-PrReady }
+    "test-protection" { Test-BranchProtection }
     default { Show-Usage }
 }
