@@ -1,0 +1,79 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+    
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Run Backend Tests
+      run: mvn clean test
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/user-management-ui/package-lock.json
+    
+    - name: Install Frontend Dependencies
+      working-directory: frontend/user-management-ui
+      run: npm ci
+    
+    - name: Build Frontend
+      working-directory: frontend/user-management-ui
+      run: npm run build
+    
+    - name: Run Frontend Tests
+      working-directory: frontend/user-management-ui
+      run: npm run test -- --watch=false --browsers=ChromeHeadless
+    
+    - name: Check for Merge Conflicts
+      run: |
+        if git merge-tree $(git merge-base HEAD origin/master) HEAD origin/master | grep -q "<<<<<<< "; then
+          echo "❌ Merge conflicts detected!"
+          exit 1
+        else
+          echo "✅ No merge conflicts detected"
+        fi
+    
+    - name: PR Size Check
+      run: |
+        files_changed=$(git diff --name-only origin/master...HEAD | wc -l)
+        if [ $files_changed -gt 50 ]; then
+          echo "❌ PR is too large ($files_changed files changed). Consider breaking it into smaller PRs."
+          exit 1
+        else
+          echo "✅ PR size is reasonable ($files_changed files changed)"
+        fi
+    
+    - name: Check Commit Messages
+      run: |
+        commits=$(git log --oneline origin/master..HEAD)
+        echo "Checking commit messages..."
+        echo "$commits"
+        if echo "$commits" | grep -qE "^[a-f0-9]+ (feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+"; then
+          echo "✅ Commit messages follow conventional format"
+        else
+          echo "⚠️  Consider using conventional commit format (feat:, fix:, docs:, etc.)"
+        fi
