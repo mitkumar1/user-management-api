@@ -58,22 +58,65 @@ public class SecurityConfig {
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeHttpRequests(authz -> authz
-                    .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/api/users/register").permitAll()
+                    // PUBLIC ENDPOINTS - No authentication required (INTERVIEW SOLUTION)
+                    .requestMatchers("/api/auth/**").permitAll()           // All auth endpoints
+                    .requestMatchers("/api/auth/login").permitAll()        // Login endpoint
+                    .requestMatchers("/api/submit/**").permitAll()         // Submit button endpoints
+                    .requestMatchers("/api/public/**").permitAll()         // Public APIs
+                    .requestMatchers("/h2-console/**").permitAll()         // H2 console
+                    .requestMatchers("/api/users/register").permitAll()    // Registration
                     .requestMatchers(HttpMethod.GET, "/api/users/{username}").permitAll()
-                    .requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers("/actuator/**").permitAll()           // Health check
+                    .requestMatchers("/swagger-ui/**").permitAll()         // Swagger UI
+                    .requestMatchers("/v3/api-docs/**").permitAll()        // API docs
                     .requestMatchers("/").permitAll()
                     .requestMatchers("/error").permitAll()
-                    .anyRequest().authenticated()
+                    
+                    // OPTION 1: Make specific endpoints passwordless
+                    .requestMatchers("/api/passwordless/**").permitAll()   // Passwordless endpoints
+                    
+                    // OPTION 2: Make ALL endpoints passwordless (uncomment below line)
+                    // .anyRequest().permitAll()                           // Allow ALL without authentication
+                    
+                    // OPTION 3: Keep some endpoints protected (current configuration)
+                    .anyRequest().authenticated()                          // Other endpoints need auth
                 );
 
-        // Fix H2 console frame options
-        http.headers().frameOptions().disable();
+        // Fix H2 console frame options (Updated for Spring Security 6.1+)
+        http.headers(headers -> headers.frameOptions().sameOrigin());
 
+        // Comment these lines to completely disable JWT authentication
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
+    /*
+     * INTERVIEW QUESTION SOLUTION:
+     * "How to make Spring Boot endpoints passwordless and accessible to everyone?"
+     * 
+     * APPROACH 1: Selective Passwordless Access (RECOMMENDED)
+     * - Use .permitAll() for specific endpoints like login, submit
+     * - Keep sensitive endpoints protected with .authenticated()
+     * 
+     * APPROACH 2: Complete Passwordless Application
+     * - Replace .anyRequest().authenticated() with .anyRequest().permitAll()
+     * - Comment out JWT filter and authentication provider
+     * 
+     * APPROACH 3: Disable Security Completely
+     * - Add in application.properties:
+     *   spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+     * 
+     * TESTING:
+     * - Test without Authorization header: curl -X POST http://localhost:8080/api/auth/login
+     * - Should return 200 OK instead of 401 Unauthorized
+     * 
+     * SECURITY CONSIDERATIONS:
+     * - Never make admin endpoints public in production
+     * - Implement rate limiting for public endpoints
+     * - Validate all inputs even for public endpoints
+     * - Use HTTPS in production
+     * - Monitor access logs for suspicious activity
+     */
 }

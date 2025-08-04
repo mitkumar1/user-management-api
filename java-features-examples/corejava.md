@@ -3235,7 +3235,7 @@ METHOD get(key):
 
 ### **Performance Comparison:**
 
-```
+
 // Single-threaded performance
 HashMap:           100%     (baseline)
 ConcurrentHashMap: 95%      (slight overhead)
@@ -3243,9 +3243,6 @@ ConcurrentHashMap: 95%      (slight overhead)
 // Multi-threaded performance (4 threads)
 HashMap + sync:    25%      (serialized access)
 ConcurrentHashMap: 350%     (parallel access)
-```
-
----
 
 ## Fail-Safe vs Fail-Fast
 
@@ -3254,7 +3251,6 @@ ConcurrentHashMap: 350%     (parallel access)
 - **When:** During iteration, if collection is modified
 - **How:** Uses modCount to detect changes
 
-```
 CLASS ArrayList_FailFast:
     PRIVATE modCount = 0                 // Modification counter
     
@@ -3292,7 +3288,6 @@ WHILE iterator.hasNext():
 - **When:** Works on copy of collection or uses different approach
 - **How:** Iterator works on snapshot or uses weak consistency
 
-```
 CLASS CopyOnWriteArrayList_FailSafe:
     PRIVATE volatile array[]
     
@@ -3324,7 +3319,6 @@ WHILE iterator.hasNext():
     element = iterator.next()
     list.add("D")                        // Safe to modify during iteration
     // Iterator continues with original snapshot
-```
 
 ### **Comparison:**
 
@@ -3350,15 +3344,13 @@ WHILE iterator.hasNext():
 - **Thread Safety:** Built-in concurrent access support
 - **Stability:** Won't crash due to concurrent modifications
 
----
-
 ## Queue and Priority Queue
 
 ### **What is Queue?**
 Queue is a FIFO (First-In-First-Out) data structure that provides ordered processing of elements.
 
 ### **Queue Interface:**
-```
+
 INTERFACE Queue<E> EXTENDS Collection<E>:
     METHOD offer(element): boolean       // Add to rear
     METHOD poll(): E                     // Remove from front
@@ -3366,10 +3358,9 @@ INTERFACE Queue<E> EXTENDS Collection<E>:
     METHOD add(element): boolean         // Throws exception if fails
     METHOD remove(): E                   // Throws exception if empty
     METHOD element(): E                  // Throws exception if empty
-```
 
 ### **Basic Queue Implementation:**
-```
+
 CLASS ArrayQueue<E>:
     PRIVATE elements[]
     PRIVATE front = 0                    // Index of front element
@@ -3406,14 +3397,12 @@ queue.offer("Third")
 
 element = queue.poll()                   // Remove from front -> "First"
 next = queue.peek()                      // Look at front -> "Second"
-```
 
 ### **Priority Queue:**
 - **What:** Queue where elements are served based on priority, not insertion order
 - **Order:** Natural ordering or custom Comparator
 - **Implementation:** Usually heap data structure
 
-```
 CLASS PriorityQueue<E>:
     PRIVATE heap[]                       // Min-heap by default
     PRIVATE size = 0
@@ -3513,7 +3502,6 @@ taskQueue.offer(NEW Task("High Priority", 1))
 taskQueue.offer(NEW Task("Medium Priority", 2))
 
 task = taskQueue.poll()                  // Returns "High Priority" task
-```
 
 ### **Queue vs Priority Queue:**
 
@@ -3540,7 +3528,6 @@ task = taskQueue.poll()                  // Returns "High Priority" task
 - **Event Simulation:** Process events by time
 - **Hospital Emergency:** Treat patients by severity
 
-```
 // Emergency Room Example
 CLASS Patient:
     name, severity  // 1=Critical, 2=Urgent, 3=Non-urgent
@@ -3557,6 +3544,5 @@ emergencyQueue.offer(NEW Patient("Bob", 2))       // Urgent
 nextPatient = emergencyQueue.poll()               // Alice (Critical)
 nextPatient = emergencyQueue.poll()               // Bob (Urgent)  
 nextPatient = emergencyQueue.poll()               // John (Non-urgent)
-```
 
 This comprehensive guide covers all major Core Java concepts with pseudo code examples perfect for interview preparation!
