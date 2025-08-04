@@ -12,8 +12,6 @@
 9. [Resilience & Monitoring](#resilience--monitoring)
 10. [Interview Questions & Answers](#interview-questions--answers)
 
----
-
 ## Project Overview
 
 ### Application Details

@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Java17FeaturesInterviewGuide",
+            "request": "launch",
+            "mainClass": "Java17FeaturesInterviewGuide",
+            "projectName": "user-management-api"
+        },
+        {
+            "type": "java",
             "name": "Run UserManagementApiApplication",
             "request": "launch",
             "mainClass": "com.kumar.wipro.api.UserManagementApiApplication",

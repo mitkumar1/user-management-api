@@ -190,7 +190,7 @@ import java.util.stream.Collectors;
  * Q2: Main difference between Java 8 and Java 11?
  * A: Java 11 focuses on API enhancements, performance, modularization.
  *    Java 8 introduced fundamental changes (lambdas, streams)
- * 
+ *    Java 17 introduced simplicity, safety, and expressiveness with sealed classes, pattern matching, and switch expressions.
  * Q3: What was removed in Java 11?
  * A: Java EE modules, CORBA, Nashorn JavaScript engine (deprecated)
  * 

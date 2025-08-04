@@ -3,6 +3,7 @@ D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\config\S
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\controller\UserController.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\security\CurrentUser.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\UserManagementApiApplication.java
+D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\config\MetricsConfig.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\security\UserPrincipal.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\dto\ApiResponse.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\exception\ResourceNotFoundException.java
@@ -12,6 +13,7 @@ D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\config\C
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\config\DataInitializer.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\dto\JwtAuthenticationResponse.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\model\Role.java
+D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\monitoring\CustomMetricsCollector.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\repository\RoleRepository.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\model\User.java
 D:\Java-workspace\user-management-api\src\main\java\com\kumar\wipro\api\dto\SignUpRequest.java
