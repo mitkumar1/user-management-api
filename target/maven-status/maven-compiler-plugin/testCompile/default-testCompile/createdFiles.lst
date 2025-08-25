@@ -4,5 +4,6 @@ com\kumar\wipro\api\repository\UserRepositoryTest.class
 com\kumar\wipro\api\security\JwtTokenProviderTest.class
 com\kumar\wipro\api\controller\UserControllerTest.class
 com\kumar\wipro\api\integration\AuthenticationIntegrationTest.class
+com\kumar\wipro\api\steps\UserApiSteps.class
 com\kumar\wipro\api\config\TestConfig.class
 com\kumar\wipro\api\controller\AuthControllerTest.class

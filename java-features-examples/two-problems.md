@@ -19,8 +19,8 @@
 
 #### **Initial Alert (8:30 AM)**
 ```
-From: Sarah Johnson <sarah.johnson@bofa.com> (Product Owner)
-To: Development Team <orcit-dev-team@bofa.com>
+From: Sarah Johnson <sarah.johnson@obofa.com> (Product Owner)
+To: Development Team <orcit-dev-team@obofa.com>
 Subject: 🚨 URGENT: P1 Issue - Large File Uploads Failing
 
 Team,

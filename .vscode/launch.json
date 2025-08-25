@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "DesOrder",
+            "request": "launch",
+            "mainClass": "com.kumar.wipro.api.service.DesOrder",
+            "projectName": "user-management-api"
+        },
+        {
+            "type": "java",
             "name": "Java17FeaturesInterviewGuide",
             "request": "launch",
             "mainClass": "Java17FeaturesInterviewGuide",

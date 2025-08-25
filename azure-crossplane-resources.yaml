@@ -1,0 +1,33 @@
+# Azure Crossplane Resource Manifest Example
+# This will provision an AKS cluster and Azure Container Registry (ACR)
+# You must install Crossplane and configure Azure provider credentials first
+
+---
+
+# Customized resource names and region
+---
+apiVersion: azure.crossplane.io/v1alpha3
+kind: ResourceGroup
+metadata:
+  name: umapi-rg-prod
+spec:
+  location: westeurope
+---
+apiVersion: azure.crossplane.io/v1alpha3
+kind: AKSCluster
+metadata:
+  name: umapi-aks-prod
+spec:
+  resourceGroupName: umapi-rg-prod
+  location: westeurope
+  nodeCount: 3
+  nodeVMSize: Standard_DS3_v2
+---
+apiVersion: azure.crossplane.io/v1alpha3
+kind: ContainerRegistry
+metadata:
+  name: umapiprodacr
+spec:
+  resourceGroupName: umapi-rg-prod
+  location: westeurope
+  sku: Standard

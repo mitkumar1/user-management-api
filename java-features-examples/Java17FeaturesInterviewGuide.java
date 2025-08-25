@@ -269,11 +269,10 @@ import java.util.random.RandomGeneratorFactory;
  * 
  * Q5: How do switch expressions differ from statements?
  * A: Expressions return values, prevent fall-through, more functional style
- * 
+ 
  * Q6: Purpose of text blocks?
  * A: Better multiline string handling, embedded languages support,
  *    improved readability
- * 
  * Q7: What is pattern matching for instanceof?
  * A: Combines type check with automatic casting, reduces boilerplate
  * 

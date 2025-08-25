@@ -1,0 +1,17 @@
+mat-card {
+  max-width: 400px;
+  margin: 2rem auto;
+}
+mat-form-field {
+  width: 100%;
+}
+mat-progress-spinner {
+  display: block;
+  margin: 1rem auto;
+}
+mat-error {
+  color: red;
+  margin-top: 1rem;
+  display: block;
+  text-align: center;
+}

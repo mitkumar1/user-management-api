@@ -1,0 +1,286 @@
+# SQL Interview Guide
+
+## 1. What is a Database?
+A database is an organized collection of structured data, typically stored electronically in a computer system.
+ Databases are managed by Database Management Systems (DBMS) such as MySQL, Oracle, SQL Server, and PostgreSQL.
+  They allow efficient storage, retrieval, and manipulation of data.
+
+---
+
+## 2. DDL, DML, DCL
+- **DDL (Data Definition Language):** Commands to define or modify database structure
+ (e.g., CREATE, ALTER, DROP, TRUNCATE).
+- **DML (Data Manipulation Language):** Commands to manipulate data
+ (e.g., SELECT, INSERT, UPDATE, DELETE).
+- **DCL (Data Control Language):** Commands to control access 
+(e.g., GRANT, REVOKE).
+
+---
+
+## 3. Keys in SQL
+- **Primary Key:** Uniquely identifies each record in a table. Cannot be NULL.
+- **Foreign Key:** A field in one table that refers to the primary key in another table, establishing a relationship.
+- **Candidate Key:** A column, or set of columns, that can uniquely identify any record in a table.
+ Primary key is chosen from candidate keys.
+
+---
+
+## 4. Subquery
+A subquery is a query nested inside another query. Used in SELECT, INSERT, UPDATE, or DELETE statements.
+
+**Example:**
+```sql
+SELECT name FROM employees WHERE salary > (SELECT AVG(salary) FROM employees);
+```
+- **Types:**
+  - Scalar subquery (returns single value)
+  - Row subquery (returns single row)
+  - Table subquery (returns multiple rows/columns)
+- **Usage:** WHERE, HAVING, FROM, SELECT clauses.
+
+---
+
+## 5. Index and Types
+An index is a database object that improves the speed of data retrieval.
+- **Types:**
+  - Primary Index
+  - Unique Index
+  - Composite Index (multiple columns)
+  - Full-text Index
+  - Clustered/Non-clustered Index (SQL Server)
+
+---
+
+## 6. View and Schema
+- **View:** A virtual table based on the result of a query. Used for security, abstraction, and simplifying complex queries.
+  - Use when you want to present specific data or hide complexity.
+- **Schema:** Logical container for database objects (tables, views, etc.). Used for organization and security.
+  - Use schema to group related objects.
+- **Difference:** View is a virtual table; schema is a namespace/container.
+
+---
+
+## 7. SQL Injection
+A security vulnerability where an attacker manipulates SQL queries by injecting malicious input. Prevent by using prepared statements and input validation.
+
+---
+
+## 8. UNION, GROUP BY, HAVING, EXISTS, ANY, ALL
+- **UNION:** Combines results of two queries (removes duplicates).
+- **GROUP BY:** Groups rows sharing a property for aggregation.
+- **HAVING:** Filters groups after aggregation (like WHERE for groups).
+- **EXISTS:** Checks if a subquery returns any rows.
+- **ANY/ALL:** Compare a value to any/all values in a subquery.
+
+**Examples:**
+```sql
+SELECT name FROM employees WHERE dept_id IN (SELECT id FROM departments WHERE location = 'NY');
+SELECT dept_id, COUNT(*) FROM employees GROUP BY dept_id HAVING COUNT(*) > 5;
+SELECT * FROM employees WHERE salary > ANY (SELECT salary FROM employees WHERE dept_id = 2);
+```
+
+---
+
+## 9. SQL Clauses
+- **WHERE:** Filters rows.
+- **ORDER BY:** Sorts results.
+- **AND/OR/NOT:** Logical operators.
+- **INSERT INTO:** Adds new records.
+- **NULL:** Represents missing/unknown data.
+- **VALUES:** Specifies data for INSERT.
+
+**Example:**
+```sql
+SELECT * FROM employees WHERE salary IS NOT NULL AND dept_id = 1 ORDER BY salary DESC;
+```
+
+---
+
+## 10. Aggregate Functions, LIKE, Wildcards, IN, BETWEEN, Aliases
+- **Aggregate Functions:** MIN, MAX, COUNT, SUM, AVG
+- **LIKE:** Pattern matching (use % and _ as wildcards)
+- **IN:** Match any value in a list
+- **BETWEEN:** Range check
+- **Aliases:** Temporary names for columns/tables (AS keyword)
+
+**Examples:**
+```sql
+SELECT COUNT(*) AS total, AVG(salary) FROM employees WHERE name LIKE 'A%';
+SELECT * FROM employees WHERE dept_id IN (1,2,3);
+SELECT * FROM employees WHERE salary BETWEEN 50000 AND 100000;
+```
+
+---
+
+## 11. Joins
+- **INNER JOIN:** Returns matching rows from both tables.
+- **LEFT JOIN:** All rows from left table + matching from right.
+- **RIGHT JOIN:** All rows from right table + matching from left.
+- **FULL JOIN:** All rows from both tables.
+- **SELF JOIN:** Table joined with itself.
+
+**Example:**
+```sql
+SELECT e.name, d.name FROM employees e INNER JOIN departments d ON e.dept_id = d.id;
+SELECT e1.name, e2.name AS manager FROM employees e1 LEFT JOIN employees e2 ON e1.manager_id = e2.id;
+```
+
+---
+
+## 12. Functions vs Stored Procedures
+- **Function:** Returns a value, can be used in SELECT, must return something, cannot modify DB state (in most DBs).
+- **Stored Procedure:** Set of SQL statements, can return multiple values, can modify DB state, used for business logic.
+- **Difference:** Functions are for computation; procedures for business logic and operations.
+
+---
+
+## 13. EXPLAIN PLAN
+- **What:** Shows the execution plan of a query (how DB will execute it).
+- **Why:** To analyze and optimize query performance.
+- **When:** Use when queries are slow or for tuning.
+- **Benefits:** Reveals index usage, join order, cost, and bottlenecks.
+
+**Example:**
+```sql
+EXPLAIN SELECT * FROM employees WHERE salary > 50000;
+```
+
+---
+
+
+## 14. Common Interview Queries
+- Find 2nd highest salary:
+```sql
+SELECT MAX(salary) FROM employees WHERE salary < (SELECT MAX(salary) FROM employees);
+```
+- Find duplicate records:
+```sql
+SELECT name, COUNT(*) FROM employees GROUP BY name HAVING COUNT(*) > 1;
+```
+- Employees with no manager:
+```sql
+SELECT * FROM employees WHERE manager_id IS NULL;
+```
+- Department with max employees:
+```sql
+SELECT dept_id, COUNT(*) FROM employees GROUP BY dept_id ORDER BY COUNT(*) DESC LIMIT 1;
+```
+- Employees who joined in last 30 days:
+```sql
+SELECT * FROM employees WHERE join_date >= CURRENT_DATE - INTERVAL '30 days';
+```
+- Top N salaries (e.g., top 3):
+```sql
+SELECT DISTINCT salary FROM employees ORDER BY salary DESC LIMIT 3;
+```
+- Employees with same salary:
+```sql
+SELECT salary, COUNT(*) FROM employees GROUP BY salary HAVING COUNT(*) > 1;
+```
+- Employees in more than one department:
+```sql
+SELECT employee_id FROM employee_departments GROUP BY employee_id HAVING COUNT(department_id) > 1;
+```
+- Employees who never submitted a timesheet:
+```sql
+SELECT e.* FROM employees e LEFT JOIN timesheets t ON e.id = t.employee_id WHERE t.employee_id IS NULL;
+```
+- Highest salary in each department:
+```sql
+SELECT dept_id, MAX(salary) FROM employees GROUP BY dept_id;
+```
+- Employees whose name starts and ends with 'A':
+```sql
+SELECT * FROM employees WHERE name LIKE 'A%A';
+```
+- Count of employees per job title:
+```sql
+SELECT job_title, COUNT(*) FROM employees GROUP BY job_title;
+```
+- Employees with salary above department average:
+```sql
+SELECT * FROM employees e WHERE salary > (SELECT AVG(salary) FROM employees WHERE dept_id = e.dept_id);
+```
+- Employees with the minimum salary:
+```sql
+SELECT * FROM employees WHERE salary = (SELECT MIN(salary) FROM employees);
+```
+- List managers and their direct report count:
+```sql
+SELECT manager_id, COUNT(*) AS report_count FROM employees WHERE manager_id IS NOT NULL GROUP BY manager_id;
+```
+- Employees with palindrome names:
+```sql
+SELECT * FROM employees WHERE name = REVERSE(name);
+```
+- Employees with email domain 'gmail.com':
+```sql
+SELECT * FROM employees WHERE email LIKE '%@gmail.com';
+```
+- Employees hired in a specific year (e.g., 2024):
+```sql
+SELECT * FROM employees WHERE EXTRACT(YEAR FROM join_date) = 2024;
+```
+- Employees with the highest salary in their department:
+```sql
+SELECT * FROM employees e WHERE salary = (SELECT MAX(salary) FROM employees WHERE dept_id = e.dept_id);
+```
+- Employees who have both 'Developer' and 'Tester' roles:
+```sql
+SELECT employee_id FROM employee_roles WHERE role IN ('Developer', 'Tester') GROUP BY employee_id HAVING COUNT(DISTINCT role) = 2;
+```
+- Employees who have never been late (no late entries in attendance):
+```sql
+SELECT e.* FROM employees e WHERE NOT EXISTS (SELECT 1 FROM attendance a WHERE a.employee_id = e.id AND a.status = 'Late');
+```
+
+---
+
+
+## 15. Senior Java FSD Interview SQL Questions
+
+**Q: How do you prevent SQL injection in JDBC?**
+A: Use PreparedStatement instead of Statement. Prepared statements use parameterized queries, which separate SQL logic from data and prevent malicious input from altering the query structure.
+```java
+String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+PreparedStatement ps = conn.prepareStatement(sql);
+ps.setString(1, username);
+ps.setString(2, password);
+ResultSet rs = ps.executeQuery();
+```
+
+**Q: What is the difference between a clustered and non-clustered index?**
+A: A clustered index determines the physical order of data in the table (one per table, usually the primary key). 
+A non-clustered index is a separate structure that points to the data (can have many per table). Clustered indexes are faster for range queries; non-clustered are flexible for multiple columns.
+
+**Q: How do you optimize a slow query?**
+A: Analyze the query with EXPLAIN PLAN, add appropriate indexes, avoid SELECT *, use WHERE clauses to filter data, optimize joins, and consider denormalization or query rewriting. Also, check for missing statistics and tune database parameters.
+
+**Q: Explain transaction isolation levels.**
+A: Isolation levels define how/when changes made by one transaction become visible to others:
+- Read Uncommitted: Can read uncommitted changes (dirty reads)
+- Read Committed: Only committed data is visible (no dirty reads)
+- Repeatable Read: Same rows read multiple times remain the same (no non-repeatable reads)
+- Serializable: Highest isolation, transactions are fully isolated (no phantom reads)
+
+**Q: How do you handle pagination in SQL?**
+A: Use LIMIT and OFFSET (MySQL/Postgres) or FETCH NEXT/OFFSET (SQL Server/Oracle 12c+):
+```sql
+SELECT * FROM employees ORDER BY id LIMIT 10 OFFSET 20; -- Rows 21-30
+```
+
+**Q: What is the difference between EXISTS and IN?**
+A: EXISTS checks for the existence of rows returned by a subquery (returns true/false, stops at first match). IN compares a value to a list of values returned by a subquery. EXISTS is often faster for correlated subqueries, especially with large datasets.
+
+**Q: How do you use window functions (ROW_NUMBER, RANK)?**
+A: Window functions perform calculations across a set of rows related to the current row, without collapsing them into a single output row.
+```sql
+SELECT name, salary, ROW_NUMBER() OVER (ORDER BY salary DESC) AS row_num,
+       RANK() OVER (ORDER BY salary DESC) AS salary_rank
+FROM employees;
+```
+ROW_NUMBER gives a unique sequence; RANK gives the same rank for ties.
+
+---
+
+*This guide covers the most frequently asked SQL topics and queries for Java Full Stack Developer interviews.*

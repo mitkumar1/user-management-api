@@ -8,14 +8,15 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
+// Removed invalid Angular Material imports
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -24,6 +25,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { ProfileComponent } from './components/profile/profile.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { NavbarComponent } from './components/navbar/navbar.component';
+import { WeatherComponent } from './components/weather/weather.component';
 
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
@@ -34,7 +36,8 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     RegisterComponent,
     ProfileComponent,
     DashboardComponent,
-    NavbarComponent
+    NavbarComponent,
+    WeatherComponent
   ],
   imports: [
     BrowserModule,
@@ -45,17 +48,17 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     HttpClientModule,
     
     // Angular Material Modules
-    MatToolbarModule,
-    MatButtonModule,
-    MatCardModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatIconModule,
-    MatSnackBarModule,
-    MatProgressSpinnerModule,
-    MatMenuModule,
-    MatDividerModule,
-    MatChipsModule
+  MatToolbarModule,
+  MatButtonModule,
+  MatCardModule,
+  MatFormFieldModule,
+  MatInputModule,
+  MatIconModule,
+  MatSnackBarModule,
+  MatProgressSpinnerModule,
+  MatMenuModule,
+  MatDividerModule,
+  MatChipsModule
   ],
   providers: [
     {

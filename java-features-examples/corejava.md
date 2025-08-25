@@ -113,7 +113,6 @@ PSEUDO_PROCESS BootstrapClassLoader:
         IF className.startsWith("java."):
             LOAD from JVM core libraries
             RETURN loaded class
-```
 
 **2. Extension Class Loader:**
 - **Purpose:** Loads classes from extension directories
@@ -185,7 +184,6 @@ Animal animal1 = NEW Dog()
 Animal animal2 = NEW Cat()
 animal1.makeSound()  // Prints "Dog barks" - runtime decision
 animal2.makeSound()  // Prints "Cat meows" - runtime decision
-```
 
 **Key Differences:**
 - **Overloading:** Same class, different parameters, compile-time
@@ -923,7 +921,6 @@ METHOD advancedExceptionHandling():
                 
                 // Log detailed stack trace for debugging
                 logger.debug("Suppressed exception details", suppressedException)
-```
 
 **Performance Improvements (Java 9+):**
 ```
@@ -1312,7 +1309,6 @@ METHOD processWithResult():
     RETURN SWITCH result:
         CASE Success(var value) -> processSuccess(value)
         CASE Failure(var exception) -> handleFailure(exception)
-```
 
 **Summary of Java 17/21 Exception Improvements:**
 
@@ -2055,7 +2051,6 @@ CLASS Cache:
 - **What:** Counting semaphore that maintains a set of permits
 - **Use:** Control access to shared resource with limited capacity
 
-```
 CLASS DatabaseConnectionPool:
     PRIVATE semaphore = NEW Semaphore(5)     // Max 5 connections
     PRIVATE connections = []                  // Pool of connections
@@ -2369,9 +2364,6 @@ CompletableFuture<String> future = CompletableFuture
     })
 
 String finalResult = future.get()          // "HELLO WORLD!"
-```
-
----
 
 ## Virtual Threads (Java 21)
 
@@ -2544,9 +2536,140 @@ CLASS CPUIntensiveTask:
 4. **Monitor pinning** - avoid long-running synchronized blocks
 5. **Use structured concurrency** when available
 
----
 
 ## Collections Framework
+
+---
+
+## hashCode() and equals() Methods: Internal Working
+---
+
+## == vs .equals in Java
+
+### **What does == do?**
+- **Purpose:** Checks if two references point to the exact same object in memory (reference equality).
+- **Usage:**
+    - For primitives: compares actual values (e.g., `int a == int b`).
+    - For objects: compares memory addresses (e.g., `obj1 == obj2`).
+
+```java
+String a = new String("hello");
+String b = new String("hello");
+System.out.println(a == b); // false (different objects)
+System.out.println(a == a); // true (same object)
+```
+
+### **What does .equals() do?**
+- **Purpose:** Checks if two objects are logically equal (value equality), as defined by the class's `equals()` method.
+- **Default:** In `Object`, behaves like `==` (reference equality). Most classes override for value equality.
+
+```java
+String a = new String("hello");
+String b = new String("hello");
+System.out.println(a.equals(b)); // true (same value)
+```
+
+### **Summary Table:**
+| Operator/Method | Compares           | For Primitives | For Objects         |
+|-----------------|-------------------|----------------|---------------------|
+| ==              | Reference/value   | Value          | Reference (address) |
+| .equals()       | Logical equality  | N/A            | Value (if overridden)|
+
+**Best Practice:**
+- Use `==` for reference comparison (e.g., singleton, null check).
+- Use `.equals()` for value comparison (e.g., strings, custom objects).
+
+---
+
+### **What is equals()?**
+- **Purpose:** Determines if two objects are logically equal.
+- **Default Implementation:** In `Object` class, `equals()` checks reference equality (i.e., `this == obj`).
+- **Override:** For value-based equality, override in your class.
+
+```java
+// Default in Object class
+public boolean equals(Object obj) {
+    return (this == obj);
+}
+
+// Typical override
+@Override
+public boolean equals(Object obj) {
+    if (this == obj) return true;
+    if (obj == null || getClass() != obj.getClass()) return false;
+    MyClass other = (MyClass) obj;
+    return field1.equals(other.field1) && field2 == other.field2;
+}
+```
+
+### **What is hashCode()?**
+- **Purpose:** Returns an integer hash code for the object, used in hash-based collections (e.g., `HashMap`, `HashSet`).
+- **Contract:** If two objects are equal according to `equals()`, they must have the same `hashCode()`.
+- **Default Implementation:** In `Object` class, typically derived from memory address.
+- **Override:** When overriding `equals()`, always override `hashCode()`.
+
+```java
+// Default in Object class
+public int hashCode() {
+    // Native code, often related to memory address
+}
+
+// Typical override
+@Override
+public int hashCode() {
+    return Objects.hash(field1, field2);
+}
+```
+
+### **Internal Working in Hash-Based Collections**
+1. **hashCode() is called first:**
+   - Used to find the bucket (array index) where the object might be stored.
+2. **equals() is called if hash collision occurs:**
+   - If multiple objects have the same hash code, `equals()` checks for actual equality.
+
+```java
+// Example: Adding to HashSet
+set.add(obj)
+// 1. Compute obj.hashCode() → find bucket
+// 2. If bucket is empty, store obj
+// 3. If bucket has other objects, call obj.equals(existingObj) for each
+// 4. If equals() returns true for any, do not add (duplicate)
+// 5. If equals() false for all, add obj to bucket (handle collision)
+```
+
+### **Best Practices:**
+- Always override both `equals()` and `hashCode()` together.
+- Use all significant fields in both methods.
+- Use `Objects.equals()` and `Objects.hash()` for null safety and simplicity.
+
+### **Example:**
+```java
+public class Person {
+    private String name;
+    private int age;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return age == person.age && Objects.equals(name, person.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age);
+    }
+}
+```
+
+### **Summary Table:**
+| Method     | Purpose                        | Default Behavior         | When to Override         |
+|------------|--------------------------------|-------------------------|-------------------------|
+| equals()   | Logical equality               | Reference equality      | For value-based classes |
+| hashCode() | Hash for collections           | Memory address-based    | When equals overridden  |
+
+---
 
 ### **What is Collections Framework?**
 The Collections Framework is a unified architecture for representing and manipulating collections of objects. It provides interfaces, implementations, and algorithms to work with groups of objects.
@@ -2613,7 +2736,7 @@ INTERFACE Collection<E>:
     METHOD isEmpty(): boolean
     METHOD clear(): void
     METHOD iterator(): Iterator<E>
-    METHOD toArray(): Object[]
+    METHOD toArray(): Object[]32w
 ```
 
 **2. List Interface:**
@@ -2673,7 +2796,7 @@ array.length                              // Cannot be changed
 - **Memory:** Dynamic array with automatic resizing
 - **Access:** Index-based access O(1)
 
-```
+
 CLASS ArrayList<E>:
     PRIVATE elementData[]                 // Internal array
     PRIVATE size                          // Current number of elements

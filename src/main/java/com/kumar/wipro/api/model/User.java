@@ -69,6 +69,15 @@ public class User {
         this.password = password;
     }
 
+    // Test-only constructor for integration and BDD tests
+    public User(int id, String name, String email) {
+        this.id = (long) id;
+        this.name = name;
+        this.email = email;
+        this.username = name; // Default username for tests
+        this.password = "test"; // Default password for tests
+    }
+
     public Long getId() {
         return id;
     }

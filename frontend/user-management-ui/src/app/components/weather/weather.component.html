@@ -1,0 +1,25 @@
+<mat-card>
+  <mat-card-title>Weather App</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="weatherForm" (ngSubmit)="getWeather()">
+      <mat-form-field appearance="outline">
+        <mat-label>City</mat-label>
+        <input matInput formControlName="city" placeholder="Enter city name">
+        <button mat-icon-button matSuffix type="submit" [disabled]="loading">
+          <mat-icon>search</mat-icon>
+        </button>
+      </mat-form-field>
+    </form>
+    <mat-progress-spinner *ngIf="loading" diameter="30"></mat-progress-spinner>
+    <mat-error *ngIf="error">{{ error }}</mat-error>
+    <div *ngIf="weatherData">
+      <h3>{{ weatherData.name }}, {{ weatherData.sys.country }}</h3>
+      <p>Temperature: {{ weatherData.main.temp }} °C</p>
+      <p>Weather: {{ weatherData.weather[0].description }}</p>
+      <mat-chip-listbox>
+        <mat-chip color="primary">Humidity: {{ weatherData.main.humidity }}%</mat-chip>
+        <mat-chip color="accent">Wind: {{ weatherData.wind.speed }} m/s</mat-chip>
+      </mat-chip-listbox>
+    </div>
+  </mat-card-content>
+</mat-card>

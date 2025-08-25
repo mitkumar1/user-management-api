@@ -2,7 +2,6 @@
 ## Bank of America - Risk & Compliance Team
 ### Senior Developer Interview Guide
 
----
 
 ## Table of Contents
 1. [Application Overview](#application-overview)
@@ -17,19 +16,18 @@
 10. [Database Connectivity](#database-connectivity)
 11. [Interview Talking Points](#interview-talking-points)
 
----
 
 ## Application Overview
 
 **ORCIT-EIT** is a comprehensive risk and compliance application at Bank of America designed to handle regulatory reporting, compliance monitoring, and risk assessment workflows.
 
 ### What is ORCIT-EIT?
-- **ORCIT**: Operational Risk Compliance Intelligence Tool
+- **ORCIT**: Operational Risk Compliance Integrated technologies
 - **EIT**: Enterprise Intelligence Technology
 - **Purpose**: Automate compliance processes, regulatory reporting, and risk monitoring for financial regulations
 
 ### Business Context
-```
+
 Risk & Compliance Team Responsibilities:
 ├── Regulatory Reporting (CCAR, DFAST, Basel III)
 ├── AML (Anti-Money Laundering) Monitoring
@@ -37,15 +35,11 @@ Risk & Compliance Team Responsibilities:
 ├── Credit Risk Assessment
 ├── Operational Risk Management
 └── Compliance Audit Trail
-```
-
----
 
 ## Microservices Features Overview
 
 ### **Complete Spring Cloud Ecosystem Implementation**
 
-```
 ORCIT-EIT Microservices Architecture Components:
 ├── Service Discovery & Registration
 │   ├── Netflix Eureka Server (Service Registry)
@@ -60,7 +54,7 @@ ORCIT-EIT Microservices Architecture Components:
 │
 ├── Load Balancing Strategies
 │   ├── Client-Side: Spring Cloud LoadBalancer
-│   ├── Server-Side: Ribbon (Legacy Support)
+│   ├── Server-Side: Kubernetes (service discovery, load balancing, auto-scaling, and rolling updates)
 │   ├── Algorithms: Round Robin, Weighted, Random
 │   └── Health-Check Based Routing
 │
@@ -116,9 +110,14 @@ ORCIT-EIT Microservices Architecture Components:
 │
 ├── Security & Authentication
 │   ├── OAuth2 + JWT Tokens
+│   ├── SAML2 Integration
+│   ├── MSFT EntraID (Azure AD) Integration
 │   ├── Okta Integration
 │   ├── Method-Level Security
-│   └── Inter-Service Authentication
+│   ├── Inter-Service Authentication
+│   ├── CSRF Protection
+│   ├── CORS Configuration
+│   └── Session Management
 │
 └── Database & Persistence
     ├── Oracle Database Connectivity
@@ -130,7 +129,7 @@ ORCIT-EIT Microservices Architecture Components:
 ### **Technology Stack Summary**
 
 #### **Core Spring Cloud Components**
-```yaml
+
 Spring Boot: 2.7.x / 3.x
 Spring Cloud: 2022.0.x (Kilburn)
 ├── Spring Cloud Gateway: API Gateway & Routing
@@ -142,7 +141,122 @@ Spring Cloud: 2022.0.x (Kilburn)
 ├── Spring Cloud Sleuth: Distributed Tracing
 └── Spring Cloud Stream: Message-Driven Microservices
 ```
+OAuth2 + JWT Tokens
+How it works:
+OAuth2 is an authorization framework. Users authenticate (often via SSO like Okta or EntraID), and the system issues a JWT (JSON Web Token). This token is sent with every API request.
+Internal working:
+User logs in via OAuth2 provider.
+Provider issues a JWT.
+Frontend stores the JWT (often in an httpOnly cookie).
+Backend microservices validate the JWT on each request for authentication and authorization.
+How it fits:
+All microservices trust the JWT for user identity and roles, enabling stateless, scalable authentication.
+2. SAML2 Integration
+How it works:
+SAML2 is a protocol for Single Sign-On (SSO), often used in enterprises.
+Internal working:
+User tries to access the app.
+Redirected to SAML2 Identity Provider (IdP) (e.g., corporate SSO).
+After authentication, IdP sends a SAML assertion to the app.
+The app trusts the assertion and logs the user in.
+How it fits:
+Used for integrating with enterprise SSO systems, often as an alternative or complement to OAuth2.
+3. MSFT EntraID (Azure AD) Integration
+How it works:
+Microsoft EntraID (formerly Azure AD) is an enterprise identity provider.
+Internal working:
+App is registered in Azure AD.
+Users authenticate via Microsoft’s login.
+Azure AD issues OAuth2/JWT or SAML2 tokens.
+Backend validates these tokens.
+How it fits:
+Enables seamless authentication for users with corporate Microsoft accounts.
+4. Okta Integration
+How it works:
+Okta is a cloud-based identity provider supporting OAuth2, OIDC, and SAML2.
+Internal working:
+App is registered in Okta.
+Users authenticate via Okta.
+Okta issues JWT or SAML tokens.
+Backend validates tokens for each request.
+How it fits:
+Provides SSO and centralized user management, often used for both internal and external users.
+5. Method-Level Security
+How it works:
+Restricts access to specific methods or endpoints based on user roles/permissions.
+Internal working:
+Use annotations like @PreAuthorize("hasRole('ADMIN')") on controller/service methods.
+Spring Security checks user roles from the JWT before allowing method execution.
+How it fits:
+Fine-grained access control within microservices.
+6. Inter-Service Authentication
+How it works:
+Ensures only trusted microservices can call each other.
+Internal working:
+Use mTLS (mutual TLS) or signed JWTs for service-to-service calls.
+Each service validates the caller’s identity before processing requests.
+How it fits:
+Prevents unauthorized internal traffic and enforces zero-trust principles.
+7. CSRF Protection
+How it works:
+Prevents Cross-Site Request Forgery attacks.
+Internal working:
+Server issues a CSRF token to the client.
+Client must send this token with state-changing requests (POST, PUT, DELETE).
+Server validates the token before processing the request.
+How it fits:
+Protects web applications from malicious requests made by authenticated users.
+8. CORS Configuration
+How it works:
+Controls which domains can access your APIs via browsers.
+Internal working:
+Server sets CORS headers (e.g., Access-Control-Allow-Origin) in responses.
+Browsers enforce these rules, blocking disallowed cross-origin requests.
+How it fits:
+Secures APIs from unauthorized cross-origin access, especially important for SPAs (Angular/React).
+9. Session Management
+How it works:
+Manages user sessions, especially for web UIs.
+Internal working:
+Can be stateless (JWT) or stateful (session IDs stored in Redis/DB).
+Handles session creation, expiration, and invalidation.
+How it fits:
+Ensures secure, scalable user session handling, supports logout, and session timeout.
+How They Work Together (Internal Structure)
+User Authentication:
 
+User accesses the frontend (Angular).
+Redirected to SSO provider (Okta, EntraID, SAML2 IdP).
+On successful login, receives a JWT or SAML assertion.
+API Access:
+
+Frontend sends JWT with each API request.
+API Gateway validates the JWT, applies CORS rules, and forwards the request to the appropriate microservice.
+Microservice Security:
+
+Each microservice validates the JWT, checks CSRF tokens (for browser clients), and enforces method-level security.
+Inter-service calls are authenticated using mTLS or service JWTs.
+Session & State:
+
+Stateless JWTs are preferred for APIs.
+For web UIs, session management ensures users are logged out after inactivity or on logout.
+Audit & Compliance:
+
+All authentication and authorization events are logged for compliance and monitoring.
+Summary Table
+Component	Purpose	Internal Mechanism
+OAuth2 + JWT	API authentication & authorization	Token-based, stateless, scalable
+SAML2	Enterprise SSO	Assertion-based, integrates with IdPs
+MSFT EntraID (Azure AD)	Microsoft SSO integration	OAuth2/SAML2 tokens, corporate accounts
+Okta	Cloud SSO/IdP	OAuth2/SAML2/JWT, user management
+Method-Level Security	Fine-grained access control	Annotations, role checks
+Inter-Service Authentication	Secure service-to-service calls	mTLS, signed JWTs
+CSRF Protection	Prevents cross-site request forgery	CSRF tokens, server-side validation
+CORS Configuration	Controls cross-origin browser access	HTTP headers, browser enforcement
+Session Management	Manages user sessions	JWT/stateless or session IDs/stateful
+In essence:
+All these mechanisms work together to provide a secure, scalable, and compliant authentication and authorization system for your microservices architecture.
+They ensure only the right users and services can access the right resources, protect against common web vulnerabilities, and support enterprise SSO and compliance needs.
 #### **Resilience & Fault Tolerance**
 ```yaml
 Primary: Resilience4j
@@ -158,7 +272,6 @@ Legacy: Netflix Hystrix
 ├── Thread Pool Isolation: Resource separation
 ├── Dashboard: Real-time monitoring
 └── Turbine: Metrics aggregation
-```
 
 #### **Load Balancing Strategies**
 ```yaml
@@ -1491,7 +1604,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'master', 
-                    url: 'https://github.bofa.com/risk-compliance/orcit-eit.git'
+                    url: 'https://github.obafa.com/risk-compliance/orcit-eit.git'
             }
         }
         
@@ -1628,7 +1741,7 @@ ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"
 replicaCount: 3
 
 image:
-  repository: artifactory.bofa.com/orcit-eit
+  repository: artifactory.boaba.com/orcit-eit
   tag: "latest"
   pullPolicy: Always
 
@@ -1851,7 +1964,7 @@ public class RiskAssessment {
 ### As a Senior Developer, Here's How to Present the Architecture:
 
 #### 1. **Start with Business Context**
-> "At Bank of America, I work on ORCIT-EIT, which is a critical compliance and risk management platform. We handle regulatory reporting for CCAR, DFAST, and Basel III requirements, processing millions of transactions daily for risk assessment and compliance monitoring."
+> "At Bank , I work on ORCIT-EIT, which is a critical compliance and risk management platform. We handle regulatory reporting for CCAR, DFAST, and Basel III requirements, processing millions of transactions daily for risk assessment and compliance monitoring."
 
 #### 2. **Explain the Technical Challenge**
 > "The main challenges we face are: real-time risk monitoring, handling massive data volumes, ensuring regulatory compliance, maintaining 99.9% uptime, and meeting strict security requirements in a highly regulated environment."
@@ -1891,7 +2004,3 @@ public class RiskAssessment {
 
 **Q: "How do you handle security in a microservices architecture?"**
 **A:** "We implement defense in depth: OAuth2/JWT at the gateway, mTLS for inter-service communication, role-based access control, and comprehensive audit logging. Every service validates tokens and implements proper authorization checks."
-
----
-
-This comprehensive documentation provides you with a complete technical narrative for your interview. Focus on the business impact, technical depth, and your role in architecting solutions for one of the world's largest financial institutions.

@@ -1,8 +1,9 @@
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /*
  * ============================================================================
@@ -109,7 +110,7 @@ import java.time.format.DateTimeFormatter;
  * Use Cases: Stream filtering, conditional logic, validation rules
  * Example: Predicate<Integer> isEven = x -> x % 2 == 0;
  * Usage: if (isEven.test(4)) { ... } // returns true
- * 
+ 
  * Default Methods:
  * - and(Predicate): Combines with AND logic
  * - or(Predicate): Combines with OR logic  

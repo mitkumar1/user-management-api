@@ -12,7 +12,6 @@
 9. [Resilience & Monitoring](#resilience--monitoring)
 10. [Interview Questions & Answers](#interview-questions--answers)
 
----
 
 ## Project Overview
 
@@ -36,7 +35,6 @@
 - **Approval Workflows:** Multi-level approval processes for resource requests
 - **Audit Logging:** Comprehensive activity tracking and compliance reporting
 
----
 
 ## System Architecture
 

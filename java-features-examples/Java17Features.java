@@ -42,15 +42,20 @@ public class Java17Features {
     
     // Pattern matching with sealed classes
     public double calculateArea(Shape shape) {
-        return switch (shape) {
-            case Circle c -> Math.PI * c.radius() * c.radius();
-            case Rectangle r -> r.width() * r.height();
-            case Triangle t -> {
-                // Heron's formula
-                double s = (t.a() + t.b() + t.c()) / 2;
-                yield Math.sqrt(s * (s - t.a()) * (s - t.b()) * (s - t.c()));
-            }
-        };
+        if (shape instanceof Circle) {
+            Circle c = (Circle) shape;
+            return Math.PI * c.radius() * c.radius();
+        } else if (shape instanceof Rectangle) {
+            Rectangle r = (Rectangle) shape;
+            return r.width() * r.height();
+        } else if (shape instanceof Triangle) {
+            Triangle t = (Triangle) shape;
+            // Heron's formula
+            double s = (t.a() + t.b() + t.c()) / 2;
+            return Math.sqrt(s * (s - t.a()) * (s - t.b()) * (s - t.c()));
+        } else {
+            throw new IllegalArgumentException("Unknown shape: " + shape);
+        }
     }
     
     // 2. PATTERN MATCHING FOR INSTANCEOF

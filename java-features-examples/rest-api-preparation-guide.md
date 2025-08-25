@@ -73,7 +73,7 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.nish.rest</groupId>
+<groupId>com.kumar.mithlesh.own.rest</groupId>
     <artifactId>messenger</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>war</packaging>
@@ -186,7 +186,7 @@
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>com.nish.rest</param-value>
+            <param-value>com.kumar.mithlesh.own.rest</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -269,7 +269,7 @@ Level 3: Hypermedia Controls (HATEOAS)
 ### **1. Model Layer (POJO)**
 
 ```java
-package com.nish.rest.model;
+package com.kumar.mithlesh.own.rest.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.validation.constraints.NotNull;
@@ -325,7 +325,7 @@ public class Message {
 ### **2. Custom Exception Classes**
 
 ```java
-package com.nish.rest.exception;
+package com.kumar.mithlesh.own.rest.exception;
 
 // Custom Business Exception
 public class DataNotFoundException extends RuntimeException {
@@ -369,7 +369,7 @@ public class ServiceException extends RuntimeException {
 ### **3. Error Response Model**
 
 ```java
-package com.nish.rest.model;
+package com.kumar.mithlesh.own.rest.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -408,9 +408,9 @@ public class ErrorMessage {
 ### **4. Global Exception Mapper**
 
 ```java
-package com.nish.rest.exception;
+package com.kumar.mithlesh.own.rest.exception;
 
-import com.nish.rest.model.ErrorMessage;
+import com.kumar.mithlesh.own.rest.model.ErrorMessage;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
@@ -470,11 +470,11 @@ public class ValidationExceptionMapper implements ExceptionMapper<ValidationExce
 ### **5. DAO Implementation**
 
 ```java
-package com.nish.rest.dao;
+package com.kumar.mithlesh.own.rest.dao;
 
-import com.nish.rest.model.Message;
-import com.nish.rest.exception.DataNotFoundException;
-import com.nish.rest.exception.ServiceException;
+import com.kumar.mithlesh.own.rest.model.Message;
+import com.kumar.mithlesh.own.rest.exception.DataNotFoundException;
+import com.kumar.mithlesh.own.rest.exception.ServiceException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -665,11 +665,11 @@ public class MessageDao {
 ### **6. Service Layer**
 
 ```java
-package com.nish.rest.service;
+package com.kumar.mithlesh.own.rest.service;
 
-import com.nish.rest.dao.MessageDao;
-import com.nish.rest.model.Message;
-import com.nish.rest.exception.ValidationException;
+import com.kumar.mithlesh.own.rest.dao.MessageDao;
+import com.kumar.mithlesh.own.rest.model.Message;
+import com.kumar.mithlesh.own.rest.exception.ValidationException;
 
 import java.util.Date;
 import java.util.List;
@@ -766,10 +766,10 @@ public class MessageService {
 ### **7. Resource Layer (Controller)**
 
 ```java
-package com.nish.rest.resources;
+package com.kumar.mithlesh.own.rest.resources;
 
-import com.nish.rest.model.Message;
-import com.nish.rest.service.MessageService;
+import com.kumar.mithlesh.own.rest.model.Message;
+import com.kumar.mithlesh.own.rest.service.MessageService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
@@ -860,146 +860,134 @@ public class MessageResource {
                 .header("Link", "<" + collectionUri + ">; rel=\"collection\"")
                 .build();
     }
-}
 ```
 
 ### **8. Parameter Handling Examples**
 
 ```java
-package com.nish.rest.resources;
+package com.kumar.mithlesh.own.rest.resources;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
 @Path("/params")
 public class ParameterExamples {
-    
     // Query Parameters
     @GET
     @Path("/query")
     public Response queryParams(@QueryParam("name") String name,
-                              @QueryParam("age") @DefaultValue("0") int age,
-                              @QueryParam("active") @DefaultValue("true") boolean active) {
-        
+                                @QueryParam("age") @DefaultValue("0") int age,
+                                @QueryParam("active") @DefaultValue("true") boolean active) {
         String response = String.format("Name: %s, Age: %d, Active: %s", name, age, active);
         return Response.ok(response).build();
     }
-    
+
     // Path Parameters
     @GET
     @Path("/path/{userId}/profile/{profileId}")
     public Response pathParams(@PathParam("userId") long userId,
-                             @PathParam("profileId") long profileId) {
-        
+                               @PathParam("profileId") long profileId) {
         String response = String.format("User ID: %d, Profile ID: %d", userId, profileId);
         return Response.ok(response).build();
     }
-    
+
     // Matrix Parameters
     @GET
     @Path("/matrix")
     public Response matrixParams(@MatrixParam("color") String color,
-                               @MatrixParam("size") String size) {
-        
+                                 @MatrixParam("size") String size) {
         String response = String.format("Color: %s, Size: %s", color, size);
         return Response.ok(response).build();
     }
-    
+
     // Header Parameters
     @GET
     @Path("/headers")
     public Response headerParams(@HeaderParam("User-Agent") String userAgent,
-                               @HeaderParam("Authorization") String authToken,
-                               @HeaderParam("Accept") String accept) {
-        
-        String response = String.format("User-Agent: %s, Auth: %s, Accept: %s", 
-                                      userAgent, authToken, accept);
+                                 @HeaderParam("Authorization") String authToken,
+                                 @HeaderParam("Accept") String accept) {
+        String response = String.format("User-Agent: %s, Auth: %s, Accept: %s", userAgent, authToken, accept);
         return Response.ok(response).build();
     }
-    
+
     // Cookie Parameters
     @GET
     @Path("/cookies")
     public Response cookieParams(@CookieParam("sessionId") String sessionId,
-                               @CookieParam("userId") String userId) {
-        
+                                 @CookieParam("userId") String userId) {
         String response = String.format("Session: %s, User: %s", sessionId, userId);
         return Response.ok(response).build();
     }
-    
+
     // Form Parameters
     @POST
     @Path("/form")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response formParams(@FormParam("username") String username,
-                             @FormParam("password") String password,
-                             @FormParam("email") String email) {
-        
+                               @FormParam("password") String password,
+                               @FormParam("email") String email) {
         String response = String.format("Username: %s, Email: %s", username, email);
         return Response.ok(response).build();
     }
-    
+
     // Bean Parameters
     @GET
     @Path("/bean")
     public Response beanParams(@BeanParam MessageFilterBean filterBean) {
-        String response = String.format("Year: %d, Start: %d, Size: %d", 
-                                      filterBean.getYear(), 
-                                      filterBean.getStart(), 
-                                      filterBean.getSize());
+        String response = String.format("Year: %d, Start: %d, Size: %d",
+                                        filterBean.getYear(),
+                                        filterBean.getStart(),
+                                        filterBean.getSize());
         return Response.ok(response).build();
     }
-    
+
     // Context Parameters
     @GET
     @Path("/context")
     public Response contextParams(@Context UriInfo uriInfo,
-                                @Context HttpHeaders headers,
-                                @Context SecurityContext securityContext,
-                                @Context Request request) {
-        
+                                  @Context HttpHeaders headers,
+                                  @Context SecurityContext securityContext,
+                                  @Context Request request) {
         String requestUri = uriInfo.getRequestUri().toString();
         String userAgent = headers.getHeaderString("User-Agent");
-        
         String response = String.format("URI: %s, User-Agent: %s", requestUri, userAgent);
         return Response.ok(response).build();
     }
 }
 
 // Bean Parameter Class
-public class MessageFilterBean {
-    
+class MessageFilterBean {
     @QueryParam("year")
     @DefaultValue("0")
     private int year;
-    
+
     @QueryParam("start")
     @DefaultValue("0")
     private int start;
-    
+
     @QueryParam("size")
     @DefaultValue("10")
     private int size;
-    
+
     @HeaderParam("Accept")
     private String accept;
-    
+
     @MatrixParam("format")
     private String format;
-    
+
     // Getters and Setters
     public int getYear() { return year; }
     public void setYear(int year) { this.year = year; }
-    
+
     public int getStart() { return start; }
     public void setStart(int start) { this.start = start; }
-    
+
     public int getSize() { return size; }
     public void setSize(int size) { this.size = size; }
-    
+
     public String getAccept() { return accept; }
     public void setAccept(String accept) { this.accept = accept; }
-    
+
     public String getFormat() { return format; }
     public void setFormat(String format) { this.format = format; }
 }
@@ -1012,11 +1000,11 @@ public class MessageFilterBean {
 ### **1. JUnit Test Cases**
 
 ```java
-package com.nish.rest.service;
+package com.kumar.mithlesh.own.rest.service;
 
-import com.nish.rest.exception.DataNotFoundException;
-import com.nish.rest.exception.ValidationException;
-import com.nish.rest.model.Message;
+import com.kumar.mithlesh.own.rest.exception.DataNotFoundException;
+import com.kumar.mithlesh.own.rest.exception.ValidationException;
+import com.kumar.mithlesh.own.rest.model.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1181,9 +1169,9 @@ public class MessageServiceTest {
 ### **2. Integration Test**
 
 ```java
-package com.nish.rest.integration;
+package com.kumar.mithlesh.own.rest.integration;
 
-import com.nish.rest.model.Message;
+import com.kumar.mithlesh.own.rest.model.Message;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -1261,11 +1249,11 @@ public class MessageResourceIntegrationTest {
         assertEquals("Updated message", updatedMessage.getMessage());
     }
 }
-```
+
 
 ### **3. Cucumber BDD Tests**
 
-```gherkin
+gherkin
 # src/test/resources/features/message_api.feature
 Feature: Message API
   As a client application
@@ -1330,10 +1318,10 @@ Feature: Message API
 ```
 
 ```java
-// src/test/java/com/nish/rest/steps/MessageApiSteps.java
-package com.nish.rest.steps;
+// src/test/java/com/kumar/mithlesh/own/rest/steps/MessageApiSteps.java
+package com.kumar.mithlesh.own.rest.steps;
 
-import com.nish.rest.model.Message;
+import com.kumar.mithlesh.own.rest.model.Message;
 import io.cucumber.java.en.*;
 
 import javax.ws.rs.client.Client;
