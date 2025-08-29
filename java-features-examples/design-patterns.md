@@ -3,7 +3,7 @@
 
 ## SOLID
 
-**S - Single Responsibility Principle**
+**S - Single Responsibility Principle
 
 “One class should have one and only one responsibility”
 

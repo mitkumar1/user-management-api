@@ -83,7 +83,7 @@
       }
     }
   }
-  ```
+
   
   **What is Blue-Green Deployment?**
   Blue-green deployment is a release management strategy that reduces downtime and risk by running two identical production environments—“Blue” (current live) and “Green” (new version).
@@ -177,8 +177,6 @@
   - Develop reusable shell script modules for automation and monitoring.
   - Improve incident/problem management processes and reduce repeat issues.
   - Maintain high system uptime and reliability through proactive monitoring and automation.
-
----
 
 ## 2. Core Responsibilities
 
@@ -518,7 +516,38 @@ Production outage occurred as the application could not connect to the Oracle da
 8. What steps do you take to ensure Splunk dashboards and alerts remain relevant as applications evolve?
 9. How do you handle false positives in Splunk alerts?
 10. Can you explain the role of Splunk admin vs. support engineer in managing Splunk infrastructure?
-
+#####################################Splunk Command ################################################################################
+1. search: The default command to start a search.
+2. inputlookup <table>: Search data from a lookup table.
+3. outputlookup <table>: Write results to a lookup table.
+4. append: Add results from another search.
+5. appendcols: Add columns from another search.
+6. fillnull: Replace null values with a default value.
+7. multikv: Extract fields from multi-value key-value pairs.
+8. multisearch: Run multiple searches in parallel.
+9. reverse: Reverse the order of results.
+10. spath: Parse structured data (JSON, XML).
+11. split: Split a field into multiple values.
+12. stats: Aggregate data (sum, avg, count, etc.).
+13. chart: Create charts from aggregated data.
+14. xyseries: Convert tabular data to XY series format.
+15. makemv: Convert a single value into a multi-value field.
+16. mvexpand: Expand multi-value fields into separate events.
+17. foreach: Apply an operation to multiple fields.
+18. map: Run a subsearch for each result.
+19. eval: Calculate or transform field values.
+20. transaction: Group related events.
+21. tstats: Fast, indexed search for summary data.
+22. datamodel: Search accelerated data models.
+23. eventtypes: Assign event types to events.
+24. tags: Assign tags to events.
+25. fields: Select which fields to display.
+26. delete: Remove events from the index (admin only).
+27. sendemail: Send email notifications.
+28. collect: Write results to a summary index.
+29. loadjob: Load results from a previously saved search job.
+30. metadata: Search metadata about hosts, sources, and sourcetypes.
+31. typeahead: Used for search auto-completion.
 ---
 ### Senior Support Engineer: Interview Questions & Answers
 

@@ -671,9 +671,6 @@ public class ComplianceController {
         // Method implementation
     }
 }
-```
-
----
 
 ## Microservices Communication
 

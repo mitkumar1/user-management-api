@@ -540,14 +540,11 @@ CLASS Developer IMPLEMENTS Workable, Eatable, Sleepable, Codeable:
 CLASS Manager IMPLEMENTS Workable, Eatable, Sleepable, Manageable:
     // Different combination based on role
 ```
-
 **Benefits:**
 - ✅ Clients depend only on methods they use
 - ✅ Reduced coupling between components
 - ✅ Better testability with focused interfaces
 - ✅ More flexible architecture
-
----
 
 ### **5. Dependency Inversion Principle (DIP)**
 **Definition:** High-level modules should not depend on low-level modules. Both should depend on abstractions. Abstractions should not depend on details; details should depend on abstractions.
