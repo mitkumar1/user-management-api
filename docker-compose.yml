@@ -35,8 +35,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     restart: unless-stopped
-    profiles:
-      - production
+  # No profiles: always starts with user-management-api
 
 volumes:
   app_logs:

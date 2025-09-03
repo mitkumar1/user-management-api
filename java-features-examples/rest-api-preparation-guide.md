@@ -660,7 +660,6 @@ public class MessageDao {
         return message;
     }
 }
-```
 
 ### **6. Service Layer**
 
@@ -705,7 +704,7 @@ public class MessageService {
         
         return messages;
     }
-    
+
     // Get message by ID
     public Message getMessageById(long id) {
         if (id <= 0) {
@@ -860,7 +859,7 @@ public class MessageResource {
                 .header("Link", "<" + collectionUri + ">; rel=\"collection\"")
                 .build();
     }
-```
+
 
 ### **8. Parameter Handling Examples**
 
