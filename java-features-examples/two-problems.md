@@ -530,6 +530,41 @@ Time to Resolution: 8 hours (8:30 AM to 4:30 PM)
 Effort: 1 Senior Developer + DevOps support
 ```
 
+How I Resolved the Large File Upload Issue (Interview Flow)
+1. Issue Discovery
+Early morning, compliance officers reported they couldn’t upload files larger than 5GB to our internal file storage (hosted on BofA’s private cloud/OpenShift containers).
+This was blocking critical regulatory submissions.
+We held an emergency call, created a P1 JIRA, and I was assigned as the lead developer.
+2. Root Cause Analysis
+I reviewed logs and code.
+Found that the backend tried to load the entire file into memory before uploading, causing OutOfMemory errors for files >5GB.
+Also, our internal file server had a limit for single upload requests, so uploads were timing out.
+3. Solution Design
+Proposed a chunked/multipart upload approach:
+Split large files into smaller chunks (e.g., 100MB).
+Upload each chunk sequentially to the internal file server.
+Track progress and handle errors for each chunk.
+After all chunks are uploaded, reassemble the file on the server.
+This approach is memory-efficient and supports files much larger than 5GB.
+4. Implementation & Local Testing
+Created a feature branch and implemented chunked upload logic in the backend.
+Added progress tracking and error handling.
+Tested locally by uploading a sample 6GB file using the API and confirmed successful upload to the internal file server.
+Verified that memory usage stayed low and uploads completed within reasonable time.
+5. UI Testing
+After backend fixes, I tested the file upload through the application’s UI running at localhost:4200 (Angular front-end).
+Used the browser to access the upload form, selected a large file, and started the upload.
+Confirmed that the file was uploaded successfully and appeared in the internal storage.
+Verified that the UI showed progress and success messages to the user.
+6. Deployment & Validation
+Merged changes to a hotfix branch and deployed to staging, then production after approval.
+Performed end-to-end tests with real large files in production.
+Confirmed with compliance officers that the issue was resolved and regulatory deadlines were met.
+7. Documentation & Monitoring
+Updated the JIRA ticket with resolution details.
+Documented the solution and process for future reference.
+Set up monitoring and cleanup for incomplete uploads.
+
 ## P1 Issue #2: SSL Certificate Expiration
 
 ### **Issue Discovery & Escalation**
@@ -1196,7 +1231,34 @@ Process Improvements:
 └── ✅ Comprehensive documentation and knowledge transfer completed
 ```
 
----
+How I Resolved the SSL Certificate Expiration Issue (Interview Flow)
+1. Issue Discovery
+Early morning, monitoring tools (AppDynamics) alerted a 100% failure on all external API calls due to SSL handshake errors.
+Emergency email confirmed a complete outage, affecting 500+ compliance officers and blocking regulatory reports.
+2. Escalation & Team Coordination
+An emergency bridge call was held with Product Owner, Scrum Master, DevOps, Security, and myself as Incident Commander.
+A P1 JIRA was created and I led the technical investigation.
+3. Root Cause Analysis
+Checked application logs and found SSLHandshakeException errors.
+Used OpenSSL to inspect our client certificate and discovered it had expired at midnight.
+Confirmed that all external APIs (FINRA, OCC, Federal Reserve) required valid client certificates for secure access.
+Realized the auto-renewal process for certificates had failed and there was no monitoring in place.
+4. Emergency Resolution
+Generated a new certificate signing request (CSR).
+Coordinated with the Security team for emergency certificate signing and approval.
+Downloaded and installed the new certificate on all affected servers.
+Restarted application services to apply the new certificate.
+Verified that all external API connections were restored and regulatory reports could be submitted.
+5. Long-term Solution
+Implemented daily automated monitoring for SSL certificate expiration (with alerts at 60, 30, and 7 days before expiry).
+Added multi-channel notifications (Slack, email, AppDynamics) for proactive alerting.
+Enhanced SSL configuration and error handling in the application.
+Created a manual endpoint for operations to trigger certificate checks.
+Updated incident response procedures to include SSL troubleshooting steps.
+6. Results & Validation
+Outage resolved in under 2 hours; all users and APIs restored.
+Regulatory deadlines met; no compliance violations.
+Future outages prevented with proactive monitoring and improved processes.
 
 ## Interview Presentation Guide
 ```

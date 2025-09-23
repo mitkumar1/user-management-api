@@ -1,3 +1,38 @@
+# Professional Introduction
+
+Hello, my name is Mithlesh Kumar. My highest qualification is MCA (Master of Computer Application) from the University of Pune. I began my career at Tech Mahindra as a Software Engineer, where I contributed to major projects for clients like AT&T, T-Mobile, and British Telecom as a Java Developer.
+
+In August 2018, I joined Wipro and worked on projects for Wells Fargo Bank as a Java Full Stack Developer, where I was part of the virtual banking team. In this role, I helped design and deliver solutions for digital banking, focusing on secure, scalable, and user-friendly platforms.
+
+Currently, I am working with First Horizon Bank as part of the Risk and Compliance team. I serve as a Technical Lead, managing both onshore and offshore teams, and work closely with Product Owners, Business Analysts, and Scrum Masters to ensure end-to-end project delivery—from development and testing to deployment in production. I lead both client-side and Wipro internal teams, driving technical excellence and collaboration.
+
+I am highly skilled in Java 17, microservices, Spring Boot, REST APIs, Spring Integration, Spark, Kafka, and front-end technologies like ReactJS and Angular 16. Additionally, I have strong expertise in CI/CD pipelines, Jenkins, CloudBees, Docker, Kubernetes, Helm charts, NGINX, and Ingress. Throughout my career, I have worked extensively with cloud platforms such as Azure and PCF using UCD.
+
+---
+
+# First Horizon Bank – Project Activities & Application Overview
+
+At First Horizon Bank, I am responsible for leading the development and delivery of a risk and compliance platform that automates regulatory processes, ensures data integrity, and supports business operations. My key activities include:
+
+- **End-to-End Project Delivery:** Overseeing requirements gathering, solution design, development, testing, deployment, and production support.
+- **Team Leadership:** Managing onshore/offshore teams, mentoring developers, and ensuring collaboration between client stakeholders and Wipro teams.
+- **Technical Architecture:** Designing scalable microservices using Java 17, Spring Boot, REST APIs, Kafka, and Spark for real-time and batch data processing.
+- **Cloud & DevOps:** Implementing CI/CD pipelines, containerization (Docker, Kubernetes), and cloud deployments (Azure, PCF) for rapid, reliable releases.
+- **Security & Compliance:** Integrating OAuth2/JWT authentication, role-based access control, and audit logging to meet regulatory requirements.
+- **Business Collaboration:** Working closely with Product Owners, BAs, and Scrum Masters to align technical solutions with business goals and compliance standards.
+- **Quality & Performance:** Driving automated testing, code reviews, and performance optimization to ensure robust, high-quality deliverables.
+
+The application supports:
+- Regulatory reporting and compliance monitoring
+- Risk assessment workflows
+- Real-time and batch notifications
+- Secure file uploads and audit trails
+- Integration with enterprise messaging and data platforms
+
+My leadership and technical contributions have enabled First Horizon Bank to achieve greater efficiency, compliance, and reliability in their risk and compliance operations.
+
+---
+
 # ORCIT-EIT Application Architecture
 ## Bank of America - Risk & Compliance Team
 ### Senior Developer Interview Guide
@@ -17,11 +52,9 @@
 10. [Database Connectivity](#database-connectivity)
 11. [Interview Talking Points](#interview-talking-points)
 
----
-
 ## Application Overview
 
-**ORCIT-EIT** is a comprehensive risk and compliance application at Bank of America designed to handle regulatory reporting, compliance monitoring, and risk assessment workflows.
+**ORCIT-EIT** is a comprehensive risk and compliance application at First horizon bank designed to handle regulatory reporting, compliance monitoring, and risk assessment workflows.
 
 ### What is ORCIT-EIT?
 - **ORCIT**: Operational Risk Compliance Intelligence Tool
@@ -37,15 +70,11 @@ Risk & Compliance Team Responsibilities:
 ├── Credit Risk Assessment
 ├── Operational Risk Management
 └── Compliance Audit Trail
-```
-
----
 
 ## Microservices Features Overview
 
 ### **Complete Spring Cloud Ecosystem Implementation**
 
-```
 ORCIT-EIT Microservices Architecture Components:
 ├── Service Discovery & Registration
 │   ├── Netflix Eureka Server (Service Registry)
@@ -237,8 +266,6 @@ Topics & Use Cases:
 #### **5. Monitoring & Observability**
 > "We have comprehensive monitoring with AppDynamics and Dynatrace providing real-time application performance monitoring. Spring Cloud Sleuth enables distributed tracing across service calls, and we use Micrometer with Prometheus for custom metrics collection. This gives us full observability into our microservices ecosystem."
 
----
-
 ## Module Architecture
 
 ### 1. **automessaging**
@@ -418,6 +445,52 @@ Purpose: Testing framework for response file generation
 │  ├── Configuration Schema                                      │
 │  └── Archive Schema                                            │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## High-Level System Architecture Diagram
+```
++-----------------------------+
+|         End Users           |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|      API Gateway Layer      |
+|  (Routing, Auth, Security)  |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|     Microservices Cluster   |
+|  - Compliance Service       |
+|  - Risk Service             |
+|  - Audit Service            |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|   Integration Layer         |
+|  - Message Channels         |
+|  - Adapters (Kafka, REST)   |
+|  - Workflow Orchestration   |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|     Analytics Engine        |
+|  - Batch Data Processing    |
+|  - Real-Time Analytics      |
+|  - ETL Pipelines            |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|   Data Storage Layer        |
+|  - Oracle DB                              |
+|  - Kafka Cluster            |
++-----------------------------+
 ```
 
 ---
@@ -1893,5 +1966,7 @@ public class RiskAssessment {
 **A:** "We implement defense in depth: OAuth2/JWT at the gateway, mTLS for inter-service communication, role-based access control, and comprehensive audit logging. Every service validates tokens and implements proper authorization checks."
 
 ---
+
+I am confident that my technical expertise, leadership experience, and commitment to delivering high-quality solutions make me a strong fit for your team.
 
 This comprehensive documentation provides you with a complete technical narrative for your interview. Focus on the business impact, technical depth, and your role in architecting solutions for one of the world's largest financial institutions.
