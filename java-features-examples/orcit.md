@@ -1,27 +1,179 @@
 # ORCIT-EIT Application Architecture
-## Bank of America - Risk & Compliance Team
+## Bank of America – Risk & Compliance Team
 ### Senior Developer Interview Guide
+**Date:** September 28, 2025
+
+## Professional Introduction
+
+Hello, my name is Mithlesh Kumar. I am a Technical Lead with expertise in Java 21, Spring Boot 3+, microservices, and cloud-native architectures. I have led teams at Wipro and First Horizon Bank, delivering secure, scalable, and compliant financial solutions.
+
+## Table of Contents
+1. Application Overview  
+2. Business Context  
+3. Technology Stack  
+4. High-Level Architecture  
+5. Module Architecture  
+6. Frontend to Backend Flow  
+7. API Security & Gateway  
+8. Microservices Communication  
+9. Failure Handling & Resilience  
+10. CI/CD Pipeline  
+11. Database Connectivity  
+12. Interview Talking Points  
 
 ---
 
-## Table of Contents
-1. [Application Overview](#application-overview)
-2. [Module Architecture](#module-architecture)
-3. [High-Level Architecture Diagram](#high-level-architecture-diagram)
-4. [Microservices Features Overview](#microservices-features-overview)
-5. [Frontend to Backend Flow](#frontend-to-backend-flow)
-6. [API Security & Gateway](#api-security--gateway)
-7. [Microservices Communication](#microservices-communication)
-8. [Failure Handling & Resilience](#failure-handling--resilience)
-9. [CI/CD Pipeline](#cicd-pipeline)
-10. [Database Connectivity](#database-connectivity)
-11. [Interview Talking Points](#interview-talking-points)
+## 1. Application Overview
+
+**ORCIT-EIT** is a risk and compliance platform for regulatory reporting, compliance monitoring, and risk assessment at First Horizon Bank.
+
+---
+
+## 2. Business Context
+
+Risk & Compliance Team Responsibilities:  
+- Regulatory Reporting (CCAR, DFAST, Basel III)  
+- AML Monitoring  
+- OFAC Sanctions Screening  
+- Credit Risk Assessment  
+- Operational Risk Management  
+- Compliance Audit Trail  
+
+---
+
+## 3. Technology Stack
+
+- Java 21, Spring Boot 3+  
+- Spring Cloud (Gateway, Eureka, OpenFeign, LoadBalancer, Config, Sleuth, Stream)  
+- Resilience4j, Hystrix (legacy)  
+- Apache Kafka  
+- Oracle Database 19c, JPA/Hibernate  
+- Angular 11/16 SPA  
+- Docker, Kubernetes, Helm, Jenkins  
+- AppDynamics, Dynatrace, Prometheus, Grafana  
+
+---
+
+## 4. High-Level Architecture
+
+**Layers:**  
+- Frontend: Angular SPA  
+- API Gateway: Spring Cloud Gateway (OAuth2/JWT, Okta, Rate Limiting, Circuit Breaker)  
+- Service Discovery: Netflix Eureka  
+- Microservices: Domain-driven, resilient, event-driven  
+- Database: Oracle DB, Kafka cluster  
+
+**Flow:**  
+End Users → API Gateway → Microservices Cluster → Integration Layer (Kafka, REST) → Analytics Engine → Data Storage Layer (Oracle, Kafka)
+
+---
+
+## 5. Module Architecture
+
+- **automessaging**: Automated notifications (alerts, breaches, reporting)  
+- **batchnotification**: Batch processing for large-scale notifications  
+- **domain**: Core business models (risk, compliance, customer, transaction)  
+- **EIT_bulk-offline**: Bulk data processing, historical analysis  
+- **file upload core**: Secure file handling, validation, audit trail  
+- **messaging**: Real-time event-driven communication  
+- **notifications**: UI alerts, push/email/SMS integration  
+- **response file core**: Regulatory response file management  
+- **response file generation testing**: Automated and performance testing for file generation  
+
+---
+
+## 6. Frontend to Backend Flow
+
+1. User logs in via Angular SPA  
+2. Redirect to Okta OAuth2 for authentication  
+3. JWT token issued and stored securely  
+4. API calls routed through Gateway with JWT  
+5. Gateway forwards to microservices (discovered via Eureka)  
+6. Microservices interact with Oracle DB/Kafka  
+7. Responses flow back to UI
+
+---
+
+## 7. API Security & Gateway
+
+- Okta OAuth2 SSO  
+- JWT token validation  
+- Role-based access control  
+- Method-level security  
+- Inter-service authentication  
+- Audit logging
+
+---
+
+## 8. Microservices Communication
+
+- Service Discovery: Eureka  
+- Load Balancing: Spring Cloud LoadBalancer, Ribbon (legacy)  
+- Synchronous: OpenFeign  
+- Asynchronous: Apache Kafka  
+- Circuit Breakers: Resilience4j, Hystrix  
+- Monitoring: AppDynamics, Dynatrace, Micrometer
+
+---
+
+## 9. Failure Handling & Resilience
+
+- Circuit Breaker, Bulkhead, Retry, Rate Limiter (Resilience4j)  
+- Saga pattern for distributed transactions  
+- Compensation mechanisms for failures  
+- Real-time monitoring and alerting
+
+---
+
+## 10. CI/CD Pipeline
+
+- Git feature branch workflow  
+- Jenkins pipeline for build/test/deploy  
+- Docker containerization  
+- Helm charts for Kubernetes deployment  
+- Blue-green deployments  
+- Automated quality gates
+
+---
+
+## 11. Database Connectivity
+
+- Oracle DB 19c  
+- JPA/Hibernate ORM  
+- Transaction management  
+- Repository and service layers  
+- Secure connection pooling (HikariCP)
+
+---
+
+## 12. Interview Talking Points
+
+- Business impact: Regulatory compliance, risk management, high availability  
+- Technical challenges: Real-time monitoring, data volume, security  
+- Architecture decisions: Microservices, Spring Boot, resilience patterns  
+- Security: OAuth2/JWT, RBAC, audit logging  
+- Resilience: Circuit breakers, bulkhead, saga  
+- DevOps: CI/CD, Kubernetes, monitoring  
+- Performance: Autoscaling, metrics, SLAs  
+- Leadership: Mentoring, architecture ownership
+
+**Sample Answers:**  
+- "We use Eureka for service discovery, enabling dynamic scaling and health checks."  
+- "Resilience4j circuit breakers prevent cascading failures and ensure uptime."  
+- "Kafka enables event-driven, asynchronous communication for compliance workflows."  
+- "Security is enforced at every layer with OAuth2/JWT, RBAC, and audit trails."  
+- "CI/CD pipeline automates testing, deployment, and monitoring for rapid delivery."
+
+---
+
+**Summary:**  
+This document is ready for interview presentation. It is concise, logically structured, and highlights your technical leadership, architecture decisions, and business impact. Use it to guide your interview responses and demonstrate your expertise.
 
 ---
 
 ## Application Overview
 
-**ORCIT-EIT** is a comprehensive risk and compliance application at Bank of America designed to handle regulatory reporting, compliance monitoring, and risk assessment workflows.
+**ORCIT-EIT** is a comprehensive risk and compliance application at First horizon bank designed to handle regulatory reporting, compliance monitoring, and risk assessment workflows.
 
 ### What is ORCIT-EIT?
 - **ORCIT**: Operational Risk Compliance Intelligence Tool
@@ -37,15 +189,11 @@ Risk & Compliance Team Responsibilities:
 ├── Credit Risk Assessment
 ├── Operational Risk Management
 └── Compliance Audit Trail
-```
-
----
 
 ## Microservices Features Overview
 
 ### **Complete Spring Cloud Ecosystem Implementation**
 
-```
 ORCIT-EIT Microservices Architecture Components:
 ├── Service Discovery & Registration
 │   ├── Netflix Eureka Server (Service Registry)
@@ -237,8 +385,6 @@ Topics & Use Cases:
 #### **5. Monitoring & Observability**
 > "We have comprehensive monitoring with AppDynamics and Dynatrace providing real-time application performance monitoring. Spring Cloud Sleuth enables distributed tracing across service calls, and we use Micrometer with Prometheus for custom metrics collection. This gives us full observability into our microservices ecosystem."
 
----
-
 ## Module Architecture
 
 ### 1. **automessaging**
@@ -418,6 +564,52 @@ Purpose: Testing framework for response file generation
 │  ├── Configuration Schema                                      │
 │  └── Archive Schema                                            │
 └─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## High-Level System Architecture Diagram
+```
++-----------------------------+
+|         End Users           |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|      API Gateway Layer      |
+|  (Routing, Auth, Security)  |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|     Microservices Cluster   |
+|  - Compliance Service       |
+|  - Risk Service             |
+|  - Audit Service            |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|   Integration Layer         |
+|  - Message Channels         |
+|  - Adapters (Kafka, REST)   |
+|  - Workflow Orchestration   |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|     Analytics Engine        |
+|  - Batch Data Processing    |
+|  - Real-Time Analytics      |
+|  - ETL Pipelines            |
++-----------------------------+
+             |
+             v
++-----------------------------+
+|   Data Storage Layer        |
+|  - Oracle DB                              |
+|  - Kafka Cluster            |
++-----------------------------+
 ```
 
 ---
@@ -1893,5 +2085,7 @@ public class RiskAssessment {
 **A:** "We implement defense in depth: OAuth2/JWT at the gateway, mTLS for inter-service communication, role-based access control, and comprehensive audit logging. Every service validates tokens and implements proper authorization checks."
 
 ---
+
+I am confident that my technical expertise, leadership experience, and commitment to delivering high-quality solutions make me a strong fit for your team.
 
 This comprehensive documentation provides you with a complete technical narrative for your interview. Focus on the business impact, technical depth, and your role in architecting solutions for one of the world's largest financial institutions.

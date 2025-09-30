@@ -280,3 +280,40 @@ public class Java11Features {
         System.out.println("\nAll Java 11 features demonstrated!");
     }
 }
+
+
+
+
+Java 11 Features – What & Why
+
+- **New String Methods**  
+  *What:* Adds methods like `isBlank()`, `strip()`, `stripLeading()`, `stripTrailing()`, `lines()`, and `repeat(int)` to `String`.  
+  *How helpful:* Makes string handling easier, especially for whitespace, line splitting, and repeated text. Unicode-aware and more expressive than old `trim()`/`isEmpty()`.
+
+- **HTTP Client API**  
+  *What:* Introduces a modern, standard HTTP client (`java.net.http.HttpClient`) supporting HTTP/2, async, and WebSocket.  
+  *How helpful:* Replaces clunky `HttpURLConnection` with a fluent, non-blocking API for easier and more powerful HTTP calls.
+
+- **Files API Enhancements**  
+  *What:* Adds `Files.readString(Path)` and `Files.writeString(Path, String)` for reading/writing files as strings.  
+  *How helpful:* Reduces boilerplate for file I/O, making file operations concise and readable.
+
+- **Optional Improvements**  
+  *What:* Adds `isEmpty()` and no-arg `orElseThrow()` to `Optional`.  
+  *How helpful:* Improves code readability and reduces null checks/boilerplate when working with optionals.
+
+- **Predicate.not()**  
+  *What:* Static method to negate predicates, e.g., `Predicate.not(String::isBlank)`.  
+  *How helpful:* Makes stream/filter code more readable, especially with method references.
+
+- **Local Variable Syntax for Lambda (var in lambda)**  
+  *What:* Allows use of `var` in lambda parameters, e.g., `(var s) -> s.toUpperCase()`.  
+  *How helpful:* Enables annotations on lambda params and keeps syntax consistent with local variable type inference.
+
+- **Nest-Based Access Control**  
+  *What:* JVM feature allowing nested classes to access each other's private members directly.  
+  *How helpful:* Removes synthetic bridge methods, improving performance and reducing bytecode size (transparent to most developers).
+
+- **Dynamic Class-File Constants**  
+  *What:* JVM supports `CONSTANT_Dynamic` for constants computed at link time.  
+  *How helpful:* Enables more efficient constant pool usage and optimizations for frameworks/languages (not used directly in app code).

@@ -12,7 +12,6 @@
 9. [Resilience & Monitoring](#resilience--monitoring)
 10. [Interview Questions & Answers](#interview-questions--answers)
 
----
 
 ## Project Overview
 
@@ -36,7 +35,6 @@
 - **Approval Workflows:** Multi-level approval processes for resource requests
 - **Audit Logging:** Comprehensive activity tracking and compliance reporting
 
----
 
 ## System Architecture
 
@@ -98,8 +96,6 @@
 - **Code Quality:** SonarQube
 - **Monitoring:** Prometheus, Grafana
 - **Logging:** ELK Stack (Elasticsearch, Logstash, Kibana)
-
----
 
 ## Microservices Architecture
 
@@ -204,8 +200,6 @@
 - **MongoDB Access:** MongoTemplate for complex queries
 - **Caching:** Redis for session data and frequently accessed data
 - **Connection Pooling:** HikariCP for Oracle connections
-
----
 
 ## Frontend Architecture
 

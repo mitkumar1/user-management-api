@@ -1,8 +1,9 @@
-import java.util.*;
-import java.util.function.*;
-import java.util.stream.*;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /*
  * ============================================================================
@@ -101,7 +102,7 @@ import java.time.format.DateTimeFormatter;
  * 
  * DEFINITION: Pre-built functional interfaces in java.util.function package
  * PURPOSE: Common functional programming patterns without creating custom interfaces
- * 
+ *
  * 1. PREDICATE<T>
  * Definition: Represents a boolean-valued function that takes one argument
  * Method: boolean test(T t)
@@ -109,7 +110,7 @@ import java.time.format.DateTimeFormatter;
  * Use Cases: Stream filtering, conditional logic, validation rules
  * Example: Predicate<Integer> isEven = x -> x % 2 == 0;
  * Usage: if (isEven.test(4)) { ... } // returns true
- * 
+ 
  * Default Methods:
  * - and(Predicate): Combines with AND logic
  * - or(Predicate): Combines with OR logic  

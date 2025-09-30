@@ -11,6 +11,7 @@
 5. [Complete Example Implementation](#complete-example-implementation)
 6. [Testing Strategy](#testing-strategy)
 7. [Interview Questions & Answers](#interview-questions--answers)
+8. [Advanced REST API Topics & Senior Interview Preparation](#advanced-rest-api-topics--senior-interview-preparation)
 
 ---
 
@@ -1407,188 +1408,142 @@ public class MessageApiSteps {
 
 ---
 
-## Interview Questions & Answers
+## Advanced REST API Topics & Senior Interview Preparation
 
-### **1. REST Fundamentals**
+## API Versioning Strategies
+- URI versioning: `/api/v1/resource`
+- Header versioning: `Accept: application/vnd.company.v1+json`
+- Query parameter: `/api/resource?version=1`
+- Best practice: Use URI versioning for public APIs, header for internal APIs
 
-**Q: What is REST and what are its key principles?**
+## Pagination, Filtering, and Sorting
+- Pagination: `GET /api/messages?page=2&size=20`
+- Filtering: `GET /api/messages?author=John&status=active`
+- Sorting: `GET /api/messages?sort=created,desc`
+- Use `Link` header for next/prev pages
 
-**A:** REST (Representational State Transfer) is an architectural style for designing networked applications. Key principles include:
+## Security (OAuth2/JWT, HTTPS, CORS)
+- Use HTTPS for all endpoints
+- Implement OAuth2 or JWT for authentication/authorization
+- Enable CORS for cross-origin requests
+- Validate and sanitize all inputs
 
-- **Stateless**: Each request contains all information needed to process it
-- **Client-Server**: Separation of concerns between client and server
-- **Cacheable**: Responses should be cacheable when appropriate
-- **Uniform Interface**: Consistent way to interact with resources
-- **Layered System**: Architecture can be composed of hierarchical layers
-- **Code on Demand** (optional): Server can send executable code to client
+## Rate Limiting and Throttling
+- Limit requests per user/IP (e.g., 1000/hour)
+- Return `429 Too Many Requests` on limit breach
+- Use API gateway or reverse proxy for enforcement
 
-**Q: Explain the difference between PUT and PATCH methods.**
-
-**A:** 
-- **PUT**: Complete replacement of a resource. Idempotent. Requires full payload.
-- **PATCH**: Partial update of a resource. Non-idempotent. Requires only changed fields.
-
+## OpenAPI/Swagger Documentation
+- Use OpenAPI (Swagger) for API documentation and client generation
+- Example annotation:
 ```java
-// PUT - Full update
-PUT /messages/1
+@OpenAPIDefinition(info = @Info(title = "Messenger API", version = "v1"))
+```
+- Host Swagger UI for interactive docs
+
+## HATEOAS and Hypermedia Controls
+- Include links in responses for navigation
+- Example:
+```json
 {
-    "id": 1,
-    "message": "Updated complete message",
-    "author": "New Author",
-    "created": "2024-01-01T10:00:00Z"
+  "id": 1,
+  "message": "Hello",
+  "links": [
+    { "rel": "self", "href": "/api/messages/1" },
+    { "rel": "author", "href": "/api/users/42" }
+  ]
 }
+```
 
-// PATCH - Partial update
-PATCH /messages/1
+## RESTful Design Pitfalls & Anti-Patterns
+- Using verbs in URIs: `/getMessages` (should be `/messages`)
+- Leaking internal errors (return generic error messages)
+- Ignoring HTTP status codes (always use correct codes)
+- Overloading POST for all operations
+- Not validating input or output
+
+## Diagrams
+### Layered Architecture
+```
+[Client] <--> [Controller/Resource] <--> [Service Layer] <--> [DAO/Repository] <--> [Database]
+```
+### Request/Response Flow
+```
+[Client] -> [API Gateway] -> [REST Controller] -> [Service] -> [DAO] -> [DB]
+         <- [Response]    <- [Response]      <- [Response] <- [Response]
+```
+### Error Handling Flow
+```
+[Exception] -> [Exception Mapper] -> [Error Response Model] -> [Client]
+```
+
+## Real-World Scenarios
+**Scenario 1: Paginated Message List**
+```http
+GET /api/messages?page=2&size=10
+Response:
 {
-    "message": "Updated message only"
+  "content": [ ... ],
+  "page": 2,
+  "size": 10,
+  "totalPages": 5,
+  "links": [ { "rel": "next", "href": "/api/messages?page=3&size=10" } ]
 }
 ```
-
-### **2. JAX-RS Specific**
-
-**Q: What is JAX-RS and how does it differ from Spring REST?**
-
-**A:** JAX-RS is a Java specification for RESTful web services, while Spring REST is an implementation:
-
-| Aspect | JAX-RS | Spring REST |
-|--------|--------|-------------|
-| **Type** | Specification | Framework Implementation |
-| **Annotations** | `@Path`, `@GET`, `@POST` | `@RequestMapping`, `@GetMapping` |
-| **Dependency Injection** | CDI, HK2 | Spring IoC |
-| **Implementations** | Jersey, RESTEasy, CXF | Spring Web MVC |
-
-**Q: Explain different parameter types in JAX-RS.**
-
-**A:**
-```java
-@Path("/example")
-public class ParameterExample {
-    
-    @GET
-    @Path("/{id}")
-    public Response getAllParams(
-        @PathParam("id") Long id,                    // URL path
-        @QueryParam("filter") String filter,        // Query string
-        @HeaderParam("Authorization") String auth,   // HTTP header
-        @CookieParam("sessionId") String sessionId,  // Cookie
-        @MatrixParam("version") String version,      // Matrix params
-        @FormParam("username") String username,      // Form data
-        @BeanParam UserFilter userFilter,            // Bean parameter
-        @Context UriInfo uriInfo                     // Context injection
-    ) {
-        // Implementation
-    }
-}
+**Scenario 2: Secure Resource Access**
+```http
+GET /api/messages/1
+Authorization: Bearer <jwt-token>
+Response: 200 OK or 401 Unauthorized
+```
+**Scenario 3: API Versioning**
+```http
+GET /api/v2/messages
+Response: { ... }
 ```
 
-### **3. Error Handling**
+## Senior REST API Interview Q&A
+**Q1: How do you version a REST API?**
+A1: Use URI, header, or query parameter versioning. URI versioning is most common for public APIs.
 
-**Q: How do you implement global exception handling in JAX-RS?**
+**Q2: How do you implement pagination in REST?**
+A2: Use `page` and `size` query parameters, return metadata and navigation links in response.
 
-**A:**
-```java
-@Provider
-public class GlobalExceptionMapper implements ExceptionMapper<Exception> {
-    
-    @Override
-    public Response toResponse(Exception exception) {
-        ErrorResponse error = new ErrorResponse(
-            exception.getMessage(),
-            500,
-            "Internal Server Error"
-        );
-        
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .entity(error)
-                .build();
-    }
-}
-```
+**Q3: How do you secure a REST API?**
+A3: Use HTTPS, OAuth2/JWT, CORS, input validation, and least privilege access.
 
-### **4. Performance & Best Practices**
+**Q4: What is HATEOAS and why is it important?**
+A4: Hypermedia as the Engine of Application State; enables clients to discover actions via links, improving API evolvability.
 
-**Q: How do you handle large data responses in REST APIs?**
+**Q5: How do you handle errors in REST APIs?**
+A5: Use global exception mappers, return structured error responses with codes, messages, and documentation links.
 
-**A:** Several strategies:
+**Q6: How do you document a REST API?**
+A6: Use OpenAPI/Swagger for interactive documentation and client SDK generation.
 
-1. **Pagination**:
-```java
-@GET
-public Response getMessages(@QueryParam("page") @DefaultValue("0") int page,
-                          @QueryParam("size") @DefaultValue("20") int size) {
-    // Implementation with pagination
-}
-```
+**Q7: What are common REST anti-patterns?**
+A7: Verbs in URIs, ignoring status codes, leaking internal errors, overusing POST, poor validation.
 
-2. **Filtering**:
-```java
-@GET
-public Response getMessages(@QueryParam("filter") String filter,
-                          @QueryParam("fields") String fields) {
-    // Implementation with filtering and field selection
-}
-```
+**Q8: How do you implement rate limiting?**
+A8: Use API gateway or reverse proxy, track requests per user/IP, return 429 on limit breach.
 
-3. **Streaming**:
-```java
-@GET
-@Produces(MediaType.APPLICATION_OCTET_STREAM)
-public StreamingOutput getLargeData() {
-    return output -> {
-        // Stream data directly to output
-    };
-}
-```
+**Q9: How do you design for scalability?**
+A9: Stateless services, horizontal scaling, caching, async processing, database sharding.
 
-**Q: What are the best practices for REST API versioning?**
+**Q10: How do you handle backward compatibility?**
+A10: Use versioning, avoid breaking changes, deprecate old endpoints gradually.
 
-**A:** Four main approaches:
-
-1. **URI Versioning**: `/api/v1/messages`
-2. **Query Parameter**: `/api/messages?version=1`
-3. **Header Versioning**: `X-API-Version: 1`
-4. **Content Negotiation**: `Accept: application/vnd.api-v1+json`
-
-### **5. Security**
-
-**Q: How do you implement authentication and authorization in JAX-RS?**
-
-**A:**
-```java
-@Provider
-@Priority(Priorities.AUTHENTICATION)
-public class AuthenticationFilter implements ContainerRequestFilter {
-    
-    @Override
-    public void filter(ContainerRequestContext requestContext) throws IOException {
-        String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-        
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            requestContext.abortWith(
-                Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("Access denied")
-                        .build()
-            );
-        }
-        
-        // Validate token and set security context
-        String token = authHeader.substring("Bearer ".length());
-        if (!validateToken(token)) {
-            requestContext.abortWith(
-                Response.status(Response.Status.UNAUTHORIZED)
-                        .entity("Invalid token")
-                        .build()
-            );
-        }
-    }
-    
-    private boolean validateToken(String token) {
-        // Token validation logic
-        return true;
-    }
-}
-```
+## Best Practices & Common Pitfalls
+- Always use correct HTTP status codes
+- Validate and sanitize all inputs
+- Document APIs with OpenAPI/Swagger
+- Use pagination, filtering, and sorting for large datasets
+- Secure endpoints with OAuth2/JWT and HTTPS
+- Return generic error messages, log details internally
+- Avoid leaking stack traces or internal errors
+- Design stateless services for scalability
+- Monitor and log API usage and errors
+- Test with realistic data and edge cases
 
 ---
 

@@ -304,6 +304,133 @@ import java.time.format.DateTimeFormatter;
  * - Using parallel streams for I/O operations
  * 
  * ============================================================================
+ * ADVANCED JAVA 8 INTERVIEW SCENARIOS & DIAGRAMS
+ * ============================================================================
+ *
+ * 1. ADVANCED LAMBDA & STREAM EXAMPLES
+ * -----------------------------------------------------------------------------
+ * // Custom sorting with Comparator and lambda
+ * List<String> cities = Arrays.asList("London", "Paris", "Tokyo", "Delhi");
+ * cities.sort((a, b) -> b.length() - a.length()); // Descending by length
+ *
+ * // Stream pipeline with multiple operations
+ * List<String> result = cities.stream()
+ *     .filter(s -> s.length() > 4)
+ *     .map(String::toUpperCase)
+ *     .sorted()
+ *     .collect(Collectors.toList());
+ *
+ * // Parallel stream for performance
+ * long count = IntStream.range(1, 1_000_000)
+ *     .parallel()
+ *     .filter(n -> n % 2 == 0)
+ *     .count();
+ *
+ * // Grouping and partitioning
+ * Map<Boolean, List<Integer>> partitioned =
+ *     Stream.of(1,2,3,4,5,6,7,8,9,10)
+ *         .collect(Collectors.partitioningBy(n -> n % 2 == 0));
+ *
+ * // FlatMap for nested collections
+ * List<String> allNames = Arrays.asList("A,B", "C,D,E")
+ *     .stream()
+ *     .flatMap(s -> Arrays.stream(s.split(",")))
+ *     .collect(Collectors.toList());
+ *
+ * -----------------------------------------------------------------------------
+ * 2. OPTIONAL WORKFLOW DIAGRAM
+ * -----------------------------------------------------------------------------
+ *
+ * Optional<String> opt = Optional.ofNullable(getValue());
+ *
+ * Diagram:
+ * [Start] -> [Optional.ofNullable(value)]
+ *     |         |
+ *     |         v
+ *     |     [isPresent?] --No--> [orElse(default)]
+ *     |         |
+ *     v         Yes
+ * [map()/filter()/ifPresent()] -> [get()]
+ *
+ * -----------------------------------------------------------------------------
+ * 3. STREAM PIPELINE DIAGRAM
+ * -----------------------------------------------------------------------------
+ *
+ * Diagram:
+ * [Source] -> [Intermediate Ops: filter/map/sorted] -> [Terminal Op: collect/reduce]
+ *
+ * Example:
+ * numbers.stream()
+ *     .filter(n -> n > 10)
+ *     .map(n -> n * 2)
+ *     .sorted()
+ *     .collect(Collectors.toList());
+ *
+ * -----------------------------------------------------------------------------
+ * 4. DATE/TIME API WORKFLOW
+ * -----------------------------------------------------------------------------
+ *
+ * Diagram:
+ * [LocalDate] <-> [LocalTime] <-> [LocalDateTime] <-> [ZonedDateTime]
+ *      |                |                |                  |
+ *   [Period]        [Duration]      [Formatting]        [TimeZone]
+ *
+ * Example:
+ * LocalDateTime dt = LocalDateTime.of(2025, 9, 29, 10, 30);
+ * ZonedDateTime zdt = dt.atZone(ZoneId.of("Asia/Kolkata"));
+ * String formatted = zdt.format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+ *
+ * -----------------------------------------------------------------------------
+ * 5. INTERVIEW SCENARIOS & Q&A (ADVANCED)
+ * -----------------------------------------------------------------------------
+ *
+ * Q: How do you avoid performance issues with streams?
+ * A: Use primitive streams (IntStream, LongStream), avoid unnecessary boxing,
+ *    prefer sequential for small data, profile parallel streams, avoid side effects.
+ *
+ * Q: How do you handle checked exceptions in lambda/streams?
+ * A: Wrap checked exceptions in RuntimeException, use custom functional interfaces,
+ *    or use try/catch inside lambda.
+ *
+ * Q: How do you use Optional in a stream pipeline?
+ * A: Use flatMap to unwrap Optionals:
+ *    Stream<Optional<String>> -> flatMap(Optional::stream) -> Stream<String>
+ *
+ * Q: How do you merge two streams?
+ * A: Use Stream.concat(stream1, stream2) or Stream.of(stream1, stream2).flatMap(s -> s)
+ *
+ * Q: How do you implement a custom collector?
+ * A: Use Collector.of(supplier, accumulator, combiner, finisher) for advanced reduction.
+ *
+ * Q: How do you use method references for constructors?
+ * A: List<String> list = Arrays.asList("a", "b");
+ *    List<MyClass> objects = list.stream().map(MyClass::new).collect(Collectors.toList());
+ *
+ * Q: How do you use Stream API for file I/O?
+ * A: Files.lines(Paths.get("file.txt")).filter(line -> line.contains("error")).forEach(System.out::println);
+ *
+ * Q: How do you use Date/Time API for time zone conversion?
+ * A: ZonedDateTime.now(ZoneId.of("UTC")).withZoneSameInstant(ZoneId.of("Asia/Kolkata"));
+ *
+ * Q: How do you use Optional to chain transformations?
+ * A: Optional.of("abc").map(String::toUpperCase).filter(s -> s.length() > 2).orElse("NONE");
+ *
+ * Q: How do you use default methods for interface evolution?
+ * A: Add default methods to interfaces for backward compatibility without breaking existing implementations.
+ *
+ * -----------------------------------------------------------------------------
+ * 6. COMMON PITFALLS & BEST PRACTICES (ADVANCED)
+ * -----------------------------------------------------------------------------
+ * - Avoid modifying source collections in stream pipelines
+ * - Don't use Optional.get() without isPresent()/orElse
+ * - Don't use parallel streams for I/O or shared mutable state
+ * - Use method references for clarity and performance
+ * - Use Collectors.groupingBy for advanced grouping
+ * - Use Date/Time API for all new code, avoid java.util.Date
+ * - Document functional interfaces with @FunctionalInterface
+ * - Use Optional only for return types, not fields or parameters
+ *
+ * ============================================================================
  */
 
 public class Java8Features {

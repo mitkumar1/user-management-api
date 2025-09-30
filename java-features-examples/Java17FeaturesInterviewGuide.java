@@ -266,7 +266,7 @@ import java.util.random.RandomGeneratorFactory;
  * Q4: Benefits of records over traditional classes?
  * A: Less boilerplate, immutable by design, auto-generated methods,
  *    better data modeling
- * 
+ 
  * Q5: How do switch expressions differ from statements?
  * A: Expressions return values, prevent fall-through, more functional style
  * 
